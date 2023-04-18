@@ -1,0 +1,18 @@
+*.log
+*.key
+*.conf
+*.fsdb
+*.dc
+*.sdf
+*.err
+*.bak
+# DRC
+*.db
+*.sum
+# LVS
+*.rep
+*.rep.ext
+*layout.spi
+*source.spi
+*svdb/
+jgproject/
