@@ -3,18 +3,11 @@ testbench for duel port pipeline ntt,pwm,intt
 the tb will convert test data from signed to unsigned
 define NTT,PWM,INTT to test what function you want to test
 ***********/
+`include "ntt.svh"
 
 `define CYCLE      10.0
 `define MAX_CYCLE 14000000
 
-// need to edit mo_mul if Q is modified
-`define Q 3329
-`define DATA_WIDTH $clog2(`Q)
-// DATA_SIZE is real NTT process size
-// because kyber separate odd and even numbers
-// real size is 256/2 = 128
-`define DATA_SIZE 128
-`define NTT_STAGE_CNT $clog2(`DATA_SIZE)
 
 module tb();
 

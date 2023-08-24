@@ -6,7 +6,6 @@ output:
 	out[0] = (in[0]+in[1]) %Q
 	out[1] = (in[0]-in[1]) %Q
 ***********/
-`define ADD_SUB_STAGE_CNT 2
 
 module add_sub (
 	input clk,
