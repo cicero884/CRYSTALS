@@ -2,8 +2,8 @@
 modular multiplication
 use modified MWR2MM
 
-input: a,b
-output: c = a*b*2^(MUL_STAGE_CNT-1) %Q
+input: a,b (RANGE:unsigned 0~Q)
+output: result = a*b*2^(MUL_STAGE_CNT-1) %Q (RANGE: signed -Q~Q)
 ************/
 `include "mo_mul.svh"
 
@@ -14,7 +14,7 @@ output: c = a*b*2^(MUL_STAGE_CNT-1) %Q
 module mo_mul (
 	input clk,
 	input [`MUL_STAGE_CNT-1:0] a, input [`MUL_STAGE_CNT-1:0] b,
-	output logic signed[`MUL_STAGE_CNT:0] c
+	output logic signed[`MUL_STAGE_CNT:0] result
 );
 
 logic [`MUL_STAGE_CNT-1:0] tmp_b[`MUL_STAGE_CNT+1],tmp_a[`MUL_STAGE_CNT+1];
@@ -23,7 +23,7 @@ logic signed [`MUL_STAGE_CNT+1:0] tmp_data[`MUL_STAGE_CNT];
 assign data[0] = '0;
 assign tmp_a[0] = a;
 assign tmp_b[0] = b;
-assign c = data[`MUL_STAGE_CNT];
+assign result = data[`MUL_STAGE_CNT];
 
 always_comb begin
 	for (int i=0; i < `MUL_STAGE_CNT; i++) begin

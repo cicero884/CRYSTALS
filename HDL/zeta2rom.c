@@ -14,7 +14,7 @@ long long unsigned Q;
 int main(int argc,char *argv[]){
 	if(argc != 4){
 		printf("input : argv0=zeta, argv1=log2(poly size), argv2=Q (for kyber is 17 8 3329)\n");
-		printf("ex: zeta2rom 17 8 3329");
+		printf("ex: %s 17 8 3329\n",argv[0]);
 		return 1;
 	}
 	zeta = atoi(argv[1]);
@@ -35,12 +35,18 @@ int main(int argc,char *argv[]){
 	char fname[30];
 	sprintf(fname,"rom_%d.txt",rom_index);
 	fd = fopen(fname,"w");
-	for(int i=0; i<(1<<(bit_size)); ++i){
+	for(int i=1; i<(1<<(bit_size)); ++i){
 		out_num=1;
 		for(int j=0; j<bit_size; j++){
 			if((1<<j)&i) out_num = (unsigned long long)out_num*zeta_2[bit_size-1-j];
 			out_num = out_num % Q;
 		}
+		// pre-multiply with numbers for later mo_mul
+		// for k-red require k^(-l)
+		// for MWR2MM require 2^n
+		out_num = (out_num * 4096) % Q;
+
+
 		fprintf(fd,"%x ",out_num);
 		if(!(i&(i+1))){
 			fclose(fd);

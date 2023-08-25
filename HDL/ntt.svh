@@ -4,5 +4,5 @@
 // DATA_SIZE is real NTT process size
 // because kyber separate odd and even numbers
 // real size is 256/2 = 128
-`define DATA_SIZE 128
-`define NTT_STAGE_CNT $clog2(`DATA_SIZE-1)
+`define NTT_STAGE_CNT 7
+`define DATA_SIZE (1<<`NTT_STAGE_CNT)

@@ -90,7 +90,6 @@ always_comb begin
 		gold_out[1] = data_out[`DATA_SIZE-2-4*(out_cnt-`DATA_SIZE/2)]%Q;
 	end
 end
-ntt u_ntt(.*);
 
 `elsif PWM
 always_comb begin
@@ -115,7 +114,6 @@ always_comb begin
 		gold_out[1] = data_out[0+4*(out_cnt-`DATA_SIZE/4)];
 	end
 end
-pwm u_pwm(.*);
 
 `elsif INTT
 always_comb begin
@@ -141,7 +139,6 @@ always_comb begin
 		gold_out[1] = data_out[`DATA_SIZE/2-2-2*out_cnt];
 	end
 end
-intt u_intt(.*);
 `endif
 
 logic in_en, out_en;
@@ -209,5 +206,7 @@ always_ff @(posedge clk, posedge rst) begin
 		if(total_cycle > `MAX_CYCLE) $finish;
 	end
 end
+
+top u_top()
 
 endmodule
