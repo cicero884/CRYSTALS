@@ -17,6 +17,19 @@ assign en[0] = in_en;
 assign out = data[`NTT_STAGE_CNT];
 assign out_en = en[`NTT_STAGE_CNT];
 
+// counter for fifo which require delay `MUL_STAGE_CNT
+// use same controller for those fifo
+logic [$clog2(`MUL_STAGE_CNT)-1:0]fifo_addr;
+always_ff @(posedge clk,posedge rst) begin
+	if (rst) begin
+		fifo_addr <= 0;
+	end
+	else begin
+		if (fifo_addr == SIZE-1) fifo_addr <= 0;
+		else fifo_addr <= fifo_addr+1;
+	end
+end
+
 genvar i;
 generate
 for (i=0; i < `NTT_STAGE_CNT; i++) begin
@@ -35,13 +48,13 @@ module ntt_stage #(parameter STAGE = 0)(
 	input in_en,input signed [`DATA_WIDTH-1:0]in[2],
 	output out_en,output signed [`DATA_WIDTH-1:0]out[2]
 	output [STAGE-1:0]rom_addr,input [`DATA_SIZE-1:0]rom_data,
+	input [$clog2(`DATA_WIDTH)-1:0]fifo_addr
 );
 // mo_mul clk, add_sub clk
 logic m_clk, as_clk;
 logic m_en, as_en;
-logic stable;
 
-logic [`DATA_WIDTH-1:0] add_sub_in[2];
+logic signed[`DATA_WIDTH:0] add_sub_in[2];
 
 // twiddle factor rom
 logic [`DATA_WIDTH-1:0] tw_rom[1<<(STAGE)];
@@ -51,20 +64,24 @@ generate
 if (STAGE == 0) begin
 	// first stage
 	// all data already ordered, so dont need reorder
-	ctl_max_cnt = `MUL_STAGE_CNT + `ADD_SUB_STAGE_CNT;
+	ctl_max_cnt = `DATA_WIDTH + `ADD_SUB_STAGE_CNT;
 
-	fifo #(`DATA_WIDTH, `MUL_STAGE_CNT) s0_fifo(
-		.clk(m_clk), .in(in[0]), .out(add_sub_in[0]), 
+	fifo #(.WIDTH(`DATA_WIDTH), .SIZE(`DATA_WIDTH)) s0_fifo(
+		.clk(m_clk), .in(in[0]), .out(add_sub_in[0][`DATA_WIDTH-1:0]), 
 	.*);
+	assign add_sub_in[0][`DATA_WIDTH] = '0;
 
 	// mul with zeta
 	mo_mul s0_mul(
 		.clk(m_clk), 
-		.a(in[1]), .b(rom_data),
+		.a(rom_data), .b(in[1]),
 		.result(add_sub_in[1]),
-	)
+	);
 	// add_sub
-	//TODO(change add sub range)
+	add_sub #(.WIDTH(`DATA_WIDTH+1), .isNTT(1)) ntt(
+		.in(add_sub_in),
+		.out(out),
+
 end
 else begin
 	// other stage except 1
@@ -88,19 +105,28 @@ else begin
 end
 endcase
 
-`ifdef CLK_GATING
-// clock gating counter
-logic [$clog2(clk_max_cnt+1)-1:0] clk_cnt;
-always_ff @(posedge clk) begin
-	if(in_en ^ stable) begin
-		if(gclk_cnt < ctl_max_cnt) gclk_cnt <= gclk_cnt + 1;
+// counter for out_en
+logic [$clog2(clk_max_cnt+1)-1:0] out_cnt;
+always_ff @(posedge clk,posedge rst) begin
+	if(rst) begin
+		out_en = '0;
 	end
-	else gclk_cnt <= '0;
+	if(in_en ^ out_en) begin
+		if(out_cnt < ctl_max_cnt) out_cnt <= out_cnt + 1;
+		else out_en = !out_en;
+	end
+	else out_cnt <= '0;
 end
+//TODO:more specific clock gating?
+/*
+`ifdef CLK_GATING
+assign m_en  = (out_en&in_en)|((in_en^out_en)&(out_cnt>=0));
+assign as_en = (out_en&in_en)|((in_en^out_en)&(out_cnt>=(ctl_max_cnt-`ADD_SUB_STAGE_CNT)));
 `else
-assign m_clk = clk;
-assign as_clk = clk;
+*/
+assign m_clk  = (in_en|out_en)&clk;
+assign as_clk = (en_en|out_en)&clk;
+//`endif
 
-`endif
 endgenerate
 endmodule

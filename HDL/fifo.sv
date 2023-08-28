@@ -21,22 +21,30 @@ if(WIDTH < 256) begin
 end
 else begin
 */
-// use memory generator?
-logic [WIDTH-1:0] mem[SIZE];
-logic [$clog2(SIZE)-1:0] cnt;
+logic [$clog2(SIZE)-1:0] addr;
 always_ff @(posedge clk,posedge rst) begin
 	if (rst) begin
-		cnt <= 0;
+		addr <= 0;
 	end
 	else begin
-		if (cnt == SIZE-1) cnt <= 0;
-		else cnt <= cnt+1;
+		if (addr == SIZE-1) addr <= 0;
+		else addr <= addr+1;
 	end
 end
-always_ff @(posedge clk) begin
-	mem[cnt] <= in;
-end
-assign out = mem[cnt];
+fifo_mem #(.WIDTH(WIDTH), .SIZE(SIZE)) mem(.*);
 //end
 //endgenerate
+endmodule
+
+module fifo_mem #(parameter WIDTH, parameter SIZE)(
+	input clk,
+	input [$clog2(SIZE)-1:0] addr,
+	input [WIDTH-1:0] in,
+	output [WIDTH-1:0] out
+);
+logic [WIDTH-1:0] mem[SIZE];
+assign out = mem[addr];
+always_ff @(posedge clk) begin
+	mem[addr] <= in;
+end
 endmodule
