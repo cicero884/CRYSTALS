@@ -1,7 +1,7 @@
 # author:509
 
 # files you dont need to synthesize
-TB_TOP_FILE		=	tb.sv
+TB_TOP_FILE		=	tb_ntt.sv
 TB_MUL_TOP_FILE	=	tb_mul.sv
 # files you want synthesize
 NTT_TOP_FILE	=	ntt.sv
@@ -38,20 +38,15 @@ mul_test:
 		-sverilog \
 		-l mo_mul.log
 
-gtech:
-	vcs -R $(TB2_TOP_FILE) $(TOP_FILE) \
-		+nospecify \
-		-debug_access+all \
-		-debug_region+cell +memcbk \
+gtech_ntt:
+	vcs -R $(TB_MUL_TOP_FILE) $(MUL_TOP_FILE) \
+		+vcs+fsdbon \
+		+fsdb+mda \
+		+fsdbfile+ntt.fsdb \
+		+access+R \
 		-sverilog \
-		-l gtech.log
-
-	#-v sim_model.v
-#	irun $(TB_TOP_FILE) $(TOP_FILE) \
-#		+access+r \
-#		+define+FSDB_FILE=\"$(TOP).fsdb\" \
-#		-append_log
-	grep -e $(PASS_STR) gtech.log
+		-l mo_mul.log \
+		+define+NTT
 
 # please use Ctrl+Z , bg , fg instead add & behind command
 nw:
@@ -78,7 +73,7 @@ gate: syn/$(TOP)_syn.v
 #		+define+SDF \
 #		+define+SDFFILE=\"syn/$(TOP)_syn.sdf\" \
 #		-append_log
-	mv irun.log gate.log
+#	mv irun.log gate.log
 	vcd2saif -i *.vcd -o ntt.saif
 
 clean:

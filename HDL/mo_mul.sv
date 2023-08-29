@@ -1,12 +1,15 @@
 /************
 modular multiplication
 use modified MWR2MM
+switch a and b in this design will change range of output
+it's better to let a<Q
+
 TODO: optmize every stage to FA & HA
 
 input: a,b (RANGE:unsigned 0~Q)
-output: result = a*b*2^(WIDTH-1) %Q (RANGE: signed -Q~Q)
+output: result = a*b*2^^(WIDTH-1) %Q (RANGE: signed -Q~Q)
 ************/
-`include "parameter.svh"
+`include "ntt.svh"
 
 module mo_mul #(WIDTH)(
 	input clk,

@@ -2,9 +2,9 @@
 add and substract with modular
 
 ntt(signed):
-	input: (0 ~ (2^n-1), -Q ~ Q)
-	add_sub: (-Q ~ Q+(2^n-1), -Q ~ Q+(2^n-1))
-	after mod: 0 ~ (2^n-1)
+	input: (0 ~ (2^^n-1), -Q ~ Q)
+	add_sub: (-Q ~ Q+(2^^n-1), -Q ~ Q+(2^^n-1))
+	after mod: 0 ~ (2^^n-1)
 intt(unsigned):
 	input: (0 ~ Q, 0 ~ Q)
 	add_sub(with /2): (-Q/2 ~ Q, -Q ~ Q/2)

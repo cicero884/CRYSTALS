@@ -9,7 +9,7 @@ define NTT,PWM,INTT to test what function you want to test
 `define MAX_CYCLE 14000000
 
 
-module tb();
+module tb_ntt();
 
 logic clk = '0,rst;
 always begin 
@@ -61,7 +61,7 @@ end
 */
 int in_cnt, out_cnt;
 int data_cnt,err_cnt;
-logic [`DATA_WIDTH-1:0] in[2],out[2],gold_out[2];
+logic [`DATA_WIDTH-1:0] in[2],in2[2],out[2],gold_out[2];
 
 `ifdef NTT
 // for separate odd and even
@@ -207,6 +207,9 @@ always_ff @(posedge clk, posedge rst) begin
 	end
 end
 
-top u_top()
+top_ntt u_top_ntt(
+	.ntt_in_en(in_en), .ntt_in(in),
+	.ntt_out_en(out_en), .ntt_out(out),
+.*)
 
 endmodule

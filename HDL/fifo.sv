@@ -31,20 +31,20 @@ always_ff @(posedge clk,posedge rst) begin
 		else addr <= addr+1;
 	end
 end
-fifo_mem #(.WIDTH(WIDTH), .SIZE(SIZE)) mem(.*);
+sio_ram #(.WIDTH(WIDTH), .SIZE(SIZE)) ram(.*);
 //end
 //endgenerate
 endmodule
 
-module fifo_mem #(parameter WIDTH, parameter SIZE)(
+module sio_ram #(parameter WIDTH, parameter SIZE)(
 	input clk,
 	input [$clog2(SIZE)-1:0] addr,
 	input [WIDTH-1:0] in,
 	output [WIDTH-1:0] out
 );
-logic [WIDTH-1:0] mem[SIZE];
-assign out = mem[addr];
+logic [WIDTH-1:0] ram[SIZE];
+assign out = ram[addr];
 always_ff @(posedge clk) begin
-	mem[addr] <= in;
+	ram[addr] <= in;
 end
 endmodule
