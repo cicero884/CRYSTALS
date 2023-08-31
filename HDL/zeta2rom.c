@@ -1,7 +1,8 @@
 /*********
  * zetas2rom
  * convert zetas to required data files for rom to read
- * input : argv0=zeta , argv1=log2(poly size) (for kyber is 17,8)
+ * input : argv1=root_of_unit, argv2=log2(poly size), argv3=prine
+ * (for kyber is 17,8,3329)
  * (https://www.ietf.org/archive/id/draft-cfrg-schwabe-kyber-01.html)
  * output : multiple files for rom to read
  * *************/
@@ -11,9 +12,17 @@
 
 unsigned zeta, bit_size;
 long long unsigned Q;
+// return MSB*2
+long long unsigned MSB_2(long long unsigned msb_q){
+	for(int i=1; i <= 32; i<<=1){
+		msb_q |= (msb_q>>i);
+	}
+	return msb_q+1;
+}
 int main(int argc,char *argv[]){
 	if(argc != 4){
-		printf("input : argv0=zeta, argv1=log2(poly size), argv2=Q (for kyber is 17 8 3329)\n");
+		printf("input : argv1=root of unity, argv2=log2(poly size), argv3=Q\n");
+		printf("for kyber is 17 8 3329\n");
 		printf("ex: %s 17 8 3329\n",argv[0]);
 		return 1;
 	}
@@ -31,10 +40,10 @@ int main(int argc,char *argv[]){
 
 	unsigned rom_index=0;
 	unsigned out_num;
-	FILE *fd;
+	FILE *fd = NULL;
 	char fname[30];
-	sprintf(fname,"rom_%d.txt",rom_index);
-	fd = fopen(fname,"w");
+	//sprintf(fname,"rom_%d.rom",rom_index);
+	//fd = fopen(fname,"w");
 	for(int i=1; i<(1<<(bit_size)); ++i){
 		out_num=1;
 		for(int j=0; j<bit_size; j++){
@@ -44,16 +53,16 @@ int main(int argc,char *argv[]){
 		// pre-multiply with numbers for later mo_mul
 		// for k-red require k^(-l)
 		// for MWR2MM require 2^n
-		out_num = (out_num * 4096) % Q;
+		out_num = (out_num * MSB_2(Q)) % Q;
 
-
-		fprintf(fd,"%x ",out_num);
-		if(!(i&(i+1))){
-			fclose(fd);
-			rom_index++;
-			sprintf(fname,"rom_%d.txt",rom_index);
+		if(!(i&(i-1))){
+			if(fd) fclose(fd);
+			sprintf(fname,"rom_%d.rom",rom_index);
 			fd = fopen(fname,"w");
+			rom_index++;
 		}
+		else fprintf(fd," ",out_num);
+		fprintf(fd,"%x",out_num);
 	}
 	fclose(fd);
 	return 0;

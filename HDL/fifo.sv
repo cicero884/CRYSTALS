@@ -2,13 +2,11 @@
 fifo
 use mem
 ***********/
-
 module fifo #(parameter WIDTH, parameter SIZE)(
 	input clk,input rst,
 	input [WIDTH-1:0] in,
 	output [WIDTH-1:0] out
 );
-generate
 /*
 if(WIDTH < 256) begin 
 	DW_fifo_s1_sf #(WIDTH,  SIZE,  1,  1,  0,  3)
@@ -27,13 +25,12 @@ always_ff @(posedge clk,posedge rst) begin
 		addr <= 0;
 	end
 	else begin
-		if (addr == SIZE-1) addr <= 0;
+		if (addr >= SIZE-1) addr <= 0;
 		else addr <= addr+1;
 	end
 end
 sio_ram #(.WIDTH(WIDTH), .SIZE(SIZE)) ram(.*);
 //end
-//endgenerate
 endmodule
 
 module sio_ram #(parameter WIDTH, parameter SIZE)(

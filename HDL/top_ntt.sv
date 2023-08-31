@@ -2,6 +2,9 @@
 top_ntt
 example of usage this module
 **********/
+`include "ntt.svh"
+`include "mo_mul.svh"
+
 module top_ntt(
 	input clk, input rst,
 	input ntt_in_en, input [`DATA_WIDTH-1:0] ntt_in[2],
@@ -13,20 +16,20 @@ module top_ntt(
 );
 
 // all the zeta rom
-logic [`NTT_STAGE_CNT-2:0]rom_addr[2][`NTT_STAGE_CNT-1];
-logic [`DATA_WIDTH-1:0]rom_data[2][`NTT_STAGE_CNT];
+logic [`NTT_STAGE_CNT-2:0] rom_addr[2][`NTT_STAGE_CNT];
+logic [`DATA_WIDTH-1:0] rom_data[2][`NTT_STAGE_CNT];
 zeta_rom zeta_rom(.*);
 
 // counter for fifo which require delay `MUL_STAGE_CNT
 // use same controller for all fifo in that size
-logic [$clog2(`MUL_STAGE_CNT)-1:0]fifo_addr;
+logic [$clog2(`MUL_STAGE_CNT)-1:0] fifo1_addr;
 always_ff @(posedge clk,posedge rst) begin
 	if (rst) begin
-		fifo_addr <= 0;
+		fifo1_addr <= 0;
 	end
 	else begin
-		if (fifo_addr == SIZE-1) fifo_addr <= 0;
-		else fifo_addr <= fifo_addr+1;
+		if (fifo1_addr >= `MUL_STAGE_CNT-1) fifo1_addr <= 0;
+		else fifo1_addr <= fifo1_addr+1;
 	end
 end
 

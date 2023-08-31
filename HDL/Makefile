@@ -4,30 +4,36 @@
 TB_TOP_FILE		=	tb_ntt.sv
 TB_MUL_TOP_FILE	=	tb_mul.sv
 # files you want synthesize
-NTT_TOP_FILE	=	ntt.sv
-INTT_TOP_FILE	=	intt.sv
+TOP_FILE	=	top_ntt.sv add_sub.sv fifo.sv mo_mul.sv ntt.sv zeta_rom.sv
 MUL_TOP_FILE	=	mo_mul.sv
 # top module
-NTT_TOP			=	ntt
-INTT_TOP 		=	intt
+TOP			=	top_ntt
 
 PASS_STR	=	"ALL PASS"
 
+root_of_unit	=	17
+Q				=	3329
+N				=	8
+
 .PHONY: all gtech syn gate nw clean
 default:
-	@echo "mul_test => Run test for mo_mul.sv"
-	@echo "gtech    => Run gtech level simulation"
-	@echo "nw       => Run nWave"
-	@echo "syn      => Run synthesize in interactive mode"
-	@echo "gate     => Run gate-level simulation"
-	@echo "clean    => Clear file after synthesize"
+	@echo "mul_test  => Run test for mo_mul.sv"
+	@echo "rom_data  => Generate rom data"
+	@echo "gtech_ntt => Run gtech level simulation of ntt"
+	@echo "nw        => Run nWave"
+	@echo "syn       => Run synthesize in interactive mode"
+	@echo "gate      => Run gate-level simulation"
+	@echo "clean     => Clear file after synthesize"
 
-all: gtech syn gate
+all: gtech_ntt syn gate
 
 		#-debug_region+cell +memcbk \
 		#-debug_access+all \
 		#-debug_pp +v2k +memcbk \
 
+rom_data: zeta2rom.c
+	gcc zeta2rom.c -o zeta2rom -std=c99
+	./zeta2rom $(root_of_unit) $(N) $(Q)
 
 mul_test:
 	vcs -R $(TB_MUL_TOP_FILE) $(MUL_TOP_FILE) \
@@ -36,17 +42,21 @@ mul_test:
 		+fsdbfile+mul.fsdb \
 		+access+R \
 		-sverilog \
-		-l mo_mul.log
-
-gtech_ntt:
-	vcs -R $(TB_MUL_TOP_FILE) $(MUL_TOP_FILE) \
-		+vcs+fsdbon \
-		+fsdb+mda \
-		+fsdbfile+ntt.fsdb \
-		+access+R \
-		-sverilog \
 		-l mo_mul.log \
-		+define+NTT
+		+define+Q=$(Q)
+
+gtech_ntt: rom_data
+	vcs -R $(TB_TOP_FILE) $(TOP_FILE) \
+		-sverilog \
+		-l ntt.log \
+		+define+NTT \
+		+define+Q=$(Q) \
+		+define+NTT_STAGE_CNT=$(N)-1
+# FIXME: NTT_STAGE_CNT = N-1?
+#+vcs+fsdbon \
+#+fsdb+mda \
+#+access+R \
+#+fsdbfile+ntt.fsdb \
 
 # please use Ctrl+Z , bg , fg instead add & behind command
 nw:
