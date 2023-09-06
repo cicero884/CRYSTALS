@@ -29,10 +29,11 @@ always_ff @(posedge clk,posedge rst) begin
 		else addr <= addr+1;
 	end
 end
-sio_ram #(.WIDTH(WIDTH), .SIZE(SIZE)) ram(.*);
+sio_ram #(.WIDTH(WIDTH), .SIZE(SIZE-1)) ram(.*);
 //end
 endmodule
 
+// will delay one more clock
 module sio_ram #(parameter WIDTH, parameter SIZE)(
 	input clk,
 	input [$clog2(SIZE)-1:0] addr,
@@ -40,8 +41,8 @@ module sio_ram #(parameter WIDTH, parameter SIZE)(
 	output [WIDTH-1:0] out
 );
 logic [WIDTH-1:0] ram[SIZE];
-assign out = ram[addr];
 always_ff @(posedge clk) begin
 	ram[addr] <= in;
+	out <= ram[addr];
 end
 endmodule

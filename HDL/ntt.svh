@@ -1,3 +1,5 @@
+`ifndef NTT_SVH
+`define NTT_SVH
 //`define Q 3329
 // Q = Q_K*(2^Q_M)+1
 // 3329 = 13*(2^8)+1
@@ -10,3 +12,4 @@
 // real size is 256/2 = 128 = 2^7
 //`define NTT_STAGE_CNT 7
 
+`endif

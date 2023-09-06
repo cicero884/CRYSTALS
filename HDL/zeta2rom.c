@@ -35,7 +35,7 @@ int main(int argc,char *argv[]){
 	// pre calculate zeta^1,zeta^2,zeta^4,zeta^8....zeta^64
 	// inside zeta_2[0],zeta[1]...zeta[6];
 	for(int i=1; i<bit_size; ++i){
-		zeta_2[i] = ((unsigned long long)zeta_2[i-1]*zeta_2[i-1])%3329;
+		zeta_2[i] = ((unsigned long long)zeta_2[i-1]*zeta_2[i-1])%Q;
 	}
 
 	unsigned rom_index=0;
@@ -52,7 +52,7 @@ int main(int argc,char *argv[]){
 		}
 		// pre-multiply with numbers for later mo_mul
 		// for k-red require k^(-l)
-		// for MWR2MM require 2^n
+		// for MWR2MM require 2^n(FIXME)
 		out_num = (out_num * MSB_2(Q)) % Q;
 
 		if(!(i&(i-1))){

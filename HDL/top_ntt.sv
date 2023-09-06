@@ -25,11 +25,11 @@ zeta_rom zeta_rom(.*);
 logic [$clog2(`MUL_STAGE_CNT)-1:0] fifo1_addr;
 always_ff @(posedge clk,posedge rst) begin
 	if (rst) begin
-		fifo1_addr <= 0;
+		fifo1_addr <= '0;
 	end
 	else begin
-		if (fifo1_addr >= `MUL_STAGE_CNT-1) fifo1_addr <= 0;
-		else fifo1_addr <= fifo1_addr+1;
+		if (fifo1_addr < `MUL_STAGE_CNT-1) fifo1_addr <= fifo1_addr+1;
+		else fifo1_addr <= '0;
 	end
 end
 
@@ -39,6 +39,11 @@ ntt u_ntt(
 	.rom_addr(rom_addr[0]), .rom_data(rom_data[0]),
 .*);
 
+intt u_intt(
+	.in_en(intt_in_en), .in(intt_in),
+	.out_en(intt_out_en), .out(intt_out),
+	.rom_addr(rom_addr[0]), .rom_data(rom_data[0]),
+.*);
 
 // for pwm
 endmodule
