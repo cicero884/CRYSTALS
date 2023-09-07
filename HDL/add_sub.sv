@@ -42,8 +42,8 @@ else begin
 	logic signed[`DATA_WIDTH+1:0]tmp_data[2];
 	logic signed[`DATA_WIDTH:0]tmp_result[2];
 	always_comb begin
-		tmp_data[0] = in[0]+in[1];
-		tmp_data[1] = in[0]-in[1];
+		tmp_data[0] = in[1]+in[0];
+		tmp_data[1] = in[1]-in[0];
 		// if it's odd number, substract Q for later divide 2
 		for(int i=0; i < 2; i++) begin
 			if(tmp_data[i][0]) tmp_data[i][`DATA_WIDTH+1:`Q_M] -= `Q_K;
@@ -54,7 +54,7 @@ else begin
 			// divide by 2
 			tmp_result[i] <= tmp_data[i][`DATA_WIDTH+1:1];
 			// reduce to 0~Q
-			out[i] <= (tmp_result[i][`DATA_WIDTH])? tmp_result+`Q : tmp_result;
+			out[i] <= (tmp_result[i][`DATA_WIDTH])? tmp_result[i]+`Q : tmp_result[i];
 		end
 	end
 end

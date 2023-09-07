@@ -123,39 +123,58 @@ always_comb begin
 	// out[0]: 14 10 6 2 15 11 7 3
 	// out[1]: 12 8  4 0 13 9  5 1
 	if(out_cnt < `DATA_SIZE/4) begin
-		gold_out[0] = data_out[3+4*out_cnt];
-		gold_out[1] = data_out[1+4*out_cnt];
+		out_addr[0] = 3+4*out_cnt;
+		out_addr[1] = 1+4*out_cnt;
 	end
 	else begin
-		gold_out[0] = data_out[2+4*(out_cnt-`DATA_SIZE/4)];
-		gold_out[1] = data_out[0+4*(out_cnt-`DATA_SIZE/4)];
+		out_addr[0] = 2+4*(out_cnt-`DATA_SIZE/4);
+		out_addr[1] = 0+4*(out_cnt-`DATA_SIZE/4);
 	end
 end
+
+top_ntt u_top_ntt(
+	.ntt_in_en('0), .ntt_in('0),
+	.ntt_out_en(en_ignore[0]), .ntt_out(data_ignore[0]),
+	.intt_in_en('0), .intt_in('0),
+	.intt_out_en(en_ignore[1]), .intt_out(data_ignore[1]),
+	.pwm_in_en(in_en), .pwm_in('{in,in2}),
+	.pwm_out_en(out_en), .pwm_out(out),
+.*);
 
 `elsif INTT
 always_comb begin
 	// in[0]: 14 10 6 2 15 11 7 3
 	// in[1]: 12 8  4 0 13 9  5 1
 	if(in_cnt < `DATA_SIZE/4) begin
-		in[0] = data_in[3+4*in_cnt];
-		in[1] = data_in[1+4*in_cnt];
+		in[0] = data_in[`DATA_SIZE-3-4*in_cnt];
+		in[1] = data_in[`DATA_SIZE-1-4*in_cnt];
 	end
 	else begin
-		in[0] = data_in[2+4*(in_cnt-`DATA_SIZE/4)];
-		in[1] = data_in[0+4*(in_cnt-`DATA_SIZE/4)];
+		in[0] = data_in[`DATA_SIZE-4-4*(in_cnt-`DATA_SIZE/4)];
+		in[1] = data_in[`DATA_SIZE-2-4*(in_cnt-`DATA_SIZE/4)];
 	end
 
 	// out[0]: 8 10 12 14 9 11 13 15
 	// out[1]: 0 2  4  6  1 3  5  7
 	if(out_cnt < `DATA_SIZE/4) begin
-		gold_out[0] = data_out[`DATA_SIZE  -1-2*out_cnt];
-		gold_out[1] = data_out[`DATA_SIZE/2-1-2*out_cnt];
+		out_addr[0] =              1+2*out_cnt;
+		out_addr[1] = `DATA_SIZE/2+1+2*out_cnt;
 	end
 	else begin
-		gold_out[0] = data_out[`DATA_SIZE  -2-2*out_cnt];
-		gold_out[1] = data_out[`DATA_SIZE/2-2-2*out_cnt];
+		out_addr[0] =              2*(out_cnt-`DATA_SIZE/4);
+		out_addr[1] = `DATA_SIZE/2+2*(out_cnt-`DATA_SIZE/4);
 	end
 end
+
+top_ntt u_top_ntt(
+	.ntt_in_en('0), .ntt_in(in),
+	.ntt_out_en(en_ignore[0]), .ntt_out(data_ignore[0]),
+	.intt_in_en(in_en), .intt_in(in),
+	.intt_out_en(out_en), .intt_out(out),
+	.pwm_in_en('0), .pwm_in('{in,in2}),
+	.pwm_out_en(en_ignore[1]), .pwm_out(data_ignore[1]),
+.*);
+
 `endif
 
 function logic [`DATA_WIDTH-1:0] unsign_mod(logic signed [15:0] in);

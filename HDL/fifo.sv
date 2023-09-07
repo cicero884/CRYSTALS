@@ -19,30 +19,40 @@ if(WIDTH < 256) begin
 end
 else begin
 */
-logic [$clog2(SIZE)-1:0] addr;
+logic [$clog2(SIZE-1)-1:0] addr;
 always_ff @(posedge clk,posedge rst) begin
 	if (rst) begin
-		addr <= 0;
+		addr <= '0;
 	end
 	else begin
-		if (addr >= SIZE-1) addr <= 0;
-		else addr <= addr+1;
+		if (addr < SIZE-2) addr <= addr+1;
+		else addr <= '0;
 	end
 end
 sio_ram #(.WIDTH(WIDTH), .SIZE(SIZE-1)) ram(.*);
 //end
 endmodule
 
-// will delay one more clock
-module sio_ram #(parameter WIDTH, parameter SIZE)(
+// will delay one more clock if it's BRAM in fifo
+module sio_ram #(parameter WIDTH, parameter SIZE, parameter BRAM=1)(
 	input clk,
 	input [$clog2(SIZE)-1:0] addr,
 	input [WIDTH-1:0] in,
-	output [WIDTH-1:0] out
+	output logic[WIDTH-1:0] out
 );
 logic [WIDTH-1:0] ram[SIZE];
-always_ff @(posedge clk) begin
-	ram[addr] <= in;
-	out <= ram[addr];
+generate
+if(BRAM == 1) begin
+	always_ff @(posedge clk) begin
+		ram[addr] <= in;
+		out <= ram[addr];
+	end
 end
+else begin
+	always_ff @(posedge clk) begin
+		ram[addr] <= in;
+	end
+	assign out = ram[addr];
+end
+endgenerate
 endmodule

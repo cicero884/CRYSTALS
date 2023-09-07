@@ -4,7 +4,7 @@
 TB_TOP_FILE		=	tb_ntt.sv
 TB_MUL_TOP_FILE	=	tb_mul.sv
 # files you want synthesize
-TOP_FILE	=	top_ntt.sv add_sub.sv fifo.sv mo_mul.sv ntt.sv zeta_rom.sv
+TOP_FILE	=	top_ntt.sv add_sub.sv fifo.sv mo_mul.sv ntt.sv zeta_rom.sv intt.sv
 MUL_TOP_FILE	=	mo_mul.sv
 # top module
 TOP			=	top_ntt
@@ -20,6 +20,7 @@ default:
 	@echo "mul_test  => Run test for mo_mul.sv"
 	@echo "rom_data  => Generate rom data"
 	@echo "gtech_ntt => Run gtech level simulation of ntt"
+	@echo "gtech_intt => Run gtech level simulation of intt"
 	@echo "nw        => Run nWave"
 	@echo "syn       => Run synthesize in interactive mode"
 	@echo "gate      => Run gate-level simulation"
@@ -57,6 +58,18 @@ gtech_ntt: rom_data
 #+fsdb+mda \
 #+access+R \
 #+fsdbfile+ntt.fsdb \
+
+gtech_intt: rom_data
+	vcs -R $(TB_TOP_FILE) $(TOP_FILE) \
+		+vcs+fsdbon \
+		+fsdb+mda \
+		+access+R \
+		+fsdbfile+intt.fsdb \
+		-sverilog \
+		-l intt.log \
+		+define+INTT \
+		+define+Q=$(Q) \
+		+define+NTT_STAGE_CNT=$(N)-1
 
 # please use Ctrl+Z , bg , fg instead add & behind command
 nw:

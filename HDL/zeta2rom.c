@@ -61,7 +61,7 @@ int main(int argc,char *argv[]){
 			fd = fopen(fname,"w");
 			rom_index++;
 		}
-		else fprintf(fd," ",out_num);
+		else fprintf(fd," ");
 		fprintf(fd,"%x",out_num);
 	}
 	fclose(fd);

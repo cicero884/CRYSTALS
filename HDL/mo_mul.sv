@@ -28,6 +28,7 @@ always_comb begin
 	for (int i=0; i < WIDTH; i++) begin
 		tmp_data[i] = data[i];
 		if(tmp_b[i][i]) tmp_data[i] += tmp_a[i];
+		if(tmp_b[i][i]==='x) tmp_data[i] = 'x;
 		if(tmp_data[i][0]) tmp_data[i][WIDTH+1:`Q_M] -= `Q_K;
 	end
 end

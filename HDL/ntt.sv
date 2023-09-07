@@ -11,7 +11,7 @@ module ntt(
 
 	output logic[`NTT_STAGE_CNT-2:0] rom_addr[`NTT_STAGE_CNT],
 	input [`DATA_WIDTH-1:0] rom_data[`NTT_STAGE_CNT],
-	input [$clog2(`DATA_WIDTH)-1:0] fifo1_addr
+	input [$clog2(`MUL_STAGE_CNT-1)-1:0] fifo1_addr
 );
 logic signed [`DATA_WIDTH-1:0] data[`NTT_STAGE_CNT+1][2];
 logic en[`NTT_STAGE_CNT+1], gclk[`NTT_STAGE_CNT];
@@ -41,7 +41,7 @@ module ntt_stage #(parameter STAGE = 0)(
 	input in_en,input [`DATA_WIDTH-1:0] in[2],
 	output logic out_en,output [`DATA_WIDTH-1:0] out[2],
 	output logic [`NTT_STAGE_CNT-2:0] rom_addr,input [`DATA_WIDTH-1:0] rom_data,
-	input [$clog2(`DATA_WIDTH)-1:0] fifo1_addr
+	input [$clog2(`MUL_STAGE_CNT-1)-1:0] fifo1_addr
 );
 
 // component output
@@ -87,21 +87,19 @@ if (STAGE == 0) begin
 end
 // other stage except 0
 else begin
-	// counter for control switch & rom
 	logic [`NTT_STAGE_CNT-2:0] ctl_cnt;
-	`define SWITCH_CNT_BITS `NTT_STAGE_CNT-STAGE-2:0
-	`define ROM_BITS `NTT_STAGE_CNT-2:`NTT_STAGE_CNT-STAGE-1
+	`define SWITCH_INDEX (`NTT_STAGE_CNT-STAGE-1)
+	`define NTT_SWITCH_CNT_BITS `SWITCH_INDEX-1:0
+	`define NTT_ROM_BITS `NTT_STAGE_CNT-2:`SWITCH_INDEX
+	// counter for control switch & rom
 	always_ff @(posedge clk) begin
 		if (in_en|out_en) ctl_cnt <= ctl_cnt-1;
 		else ctl_cnt <= '1;
 	end
-
-	assign rom_addr = ctl_cnt[`ROM_BITS];
+	assign rom_addr = ctl_cnt[`NTT_ROM_BITS];
 	logic [`DATA_WIDTH-1:0] switch_data[2];
-	logic switch_bit;
-	assign switch_bit = ctl_cnt[`NTT_STAGE_CNT-STAGE-1];
 	always_ff @(posedge clk) begin
-		if(ctl_cnt[`NTT_STAGE_CNT-STAGE-1]) switch_data <= '{fifo1_out, in[1]};
+		if(ctl_cnt[`SWITCH_INDEX]) switch_data <= '{fifo1_out, in[1]};
 		else switch_data <= '{in[1], fifo1_out};
 	end
 	// mul with zeta
@@ -111,7 +109,7 @@ else begin
 	.*);
 
 	// helf reorder size
-	localparam HRS = 1<<(`NTT_STAGE_CNT-STAGE-1);
+	localparam HRS = 1<<(`SWITCH_INDEX);
 	// helf reorder size larger than mul cycle 
 	if (HRS > `MUL_STAGE_CNT) begin
 		// fifo2
@@ -129,29 +127,24 @@ else begin
 			.in('{switch_data[0], fifo2_out[1]}),
 			.out(out),
 		.*);
-		// counter for out_en
-		localparam out_max_cnt = HRS+`ADD_SUB_STAGE_CNT;
-		logic [$clog2(out_max_cnt+1)-1:0] out_cnt;
+		logic out_en_delay[`ADD_SUB_STAGE_CNT+1];
+		assign out_en = out_en_delay[`ADD_SUB_STAGE_CNT];
 		always_ff @(posedge clk,posedge rst) begin
 			if(rst) begin
-				out_en <= '0;
-				out_cnt <= '0;
+				out_en_delay <= '{default: '0};
 			end
 			else begin
-				if(in_en ^ out_en) begin
-					if(out_cnt < out_max_cnt) out_cnt <= out_cnt + 1;
-					else out_en <= !out_en;
-				end
-				else out_cnt <= '0;
+				if(!ctl_cnt[`SWITCH_INDEX]) out_en_delay[0] <= in_en;
+				for(int j=0; j < `ADD_SUB_STAGE_CNT; ++j) out_en_delay[j+1] <= out_en_delay[j];
 			end
 		end
 	end
 	// helf reorder size smaller than mul cycle
 	else begin
 		// fifo1
-		if(`NTT_STAGE_CNT-STAGE > 1) begin
-			sio_ram #(.WIDTH(`DATA_WIDTH), .SIZE(HRS-1)) fifo1(
-				.addr(ctl_cnt[`SWITCH_CNT_BITS]),
+		if(`SWITCH_INDEX > 0) begin
+			sio_ram #(.WIDTH(`DATA_WIDTH), .SIZE(HRS), .BRAM(0)) fifo1(
+				.addr(ctl_cnt[`NTT_SWITCH_CNT_BITS]),
 				.in(in[0]), .out(fifo1_out), 
 			.*);
 		end
@@ -168,20 +161,16 @@ else begin
 			.in('{fifo2_out, mul_result}),
 			.out(out),
 		.*);
-		// counter for out_en
+		// out_en
 		localparam out_max_cnt = `MUL_STAGE_CNT+`ADD_SUB_STAGE_CNT;
-		logic [$clog2(out_max_cnt+1)-1:0] out_cnt;
 		always_ff @(posedge clk,posedge rst) begin
 			if(rst) begin
 				out_en <= '0;
-				out_cnt <= '0;
 			end
 			else begin
 				if(in_en ^ out_en) begin
-					if(out_cnt < out_max_cnt) out_cnt <= out_cnt+1;
-					else out_en <= !out_en;
+					if(signed'(ctl_cnt) < -out_max_cnt) out_en <= in_en;
 				end
-				else out_cnt <= '0;
 			end
 		end
 	end

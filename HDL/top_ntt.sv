@@ -22,13 +22,13 @@ zeta_rom zeta_rom(.*);
 
 // counter for fifo which require delay `MUL_STAGE_CNT
 // use same controller for all fifo in that size
-logic [$clog2(`MUL_STAGE_CNT)-1:0] fifo1_addr;
+logic [$clog2(`MUL_STAGE_CNT-1)-1:0] fifo1_addr;
 always_ff @(posedge clk,posedge rst) begin
 	if (rst) begin
 		fifo1_addr <= '0;
 	end
 	else begin
-		if (fifo1_addr < `MUL_STAGE_CNT-1) fifo1_addr <= fifo1_addr+1;
+		if (fifo1_addr < `MUL_STAGE_CNT-2) fifo1_addr <= fifo1_addr+1;
 		else fifo1_addr <= '0;
 	end
 end
@@ -42,7 +42,7 @@ ntt u_ntt(
 intt u_intt(
 	.in_en(intt_in_en), .in(intt_in),
 	.out_en(intt_out_en), .out(intt_out),
-	.rom_addr(rom_addr[0]), .rom_data(rom_data[0]),
+	.rom_addr(rom_addr[1]), .rom_data(rom_data[1]),
 .*);
 
 // for pwm
