@@ -8,7 +8,7 @@ change NTT_CNT to number of ntt
 interface fifo_ctrl_io;
 localparam int max_hrs = 1<<(`NTT_STAGE_CNT-2);
 localparam mul_stage_bits = $clog2(`MUL_STAGE_CNT-1);
-localparam max_fifo2_addr_bits = $clog2(max(max_hrs,`MUL_STAGE_CNT))
+localparam max_fifo2_addr_bits = $clog2(max(max_hrs,`MUL_STAGE_CNT));
 
 begin: controller
 	logic en[`NTT_STAGE_CNT];

@@ -9,10 +9,13 @@ module intt(
 
 	output logic[`NTT_STAGE_CNT-2:0] rom_addr[`NTT_STAGE_CNT],
 	input [`DATA_WIDTH-1:0] rom_data[`NTT_STAGE_CNT],
-	input [$clog2(`MUL_STAGE_CNT-1)-1:0] fifo1_addr
+
+	output logic fifo_en[`NTT_STAGE_CNT],
+	input [`MAX_FIFO2_ADDR_BITS-1:0] fifo2_addr[`NTT_STAGE_CNT],
+	input [`MUL_STAGE_BITS-1:0] fifom_addr
 );
-logic [`DATA_WIDTH-1:0] data[`NTT_STAGE_CNT][2];
-logic en[`NTT_STAGE_CNT], gclk[`NTT_STAGE_CNT];
+logic [`DATA_WIDTH-1:0] data[`NTT_STAGE_CNT+1][2];
+logic en[`NTT_STAGE_CNT+1], gclk[`NTT_STAGE_CNT];
 assign data[0] = in;
 assign en[0] = in_en;
 assign out = data[`NTT_STAGE_CNT];
@@ -23,6 +26,7 @@ generate
 for (i=0; i < `NTT_STAGE_CNT-1; i++) begin : stage_loop
 	// TODO clock gating
 	localparam HRS = 1<<(i);
+	assign fifo_en[i] = en[i]|en[i+1];
 	assign gclk[i] = clk;// & (en[i]|en[i+1]);
 	if((1<<i) < `MUL_STAGE_CNT) begin
 		intt_ss #(.STAGE(i)) staged_intt_s (
@@ -30,7 +34,7 @@ for (i=0; i < `NTT_STAGE_CNT-1; i++) begin : stage_loop
 			.in_en(en[i]), .in(data[i]),
 			.out_en(en[i+1]), .out(data[i+1]),
 			.rom_addr(rom_addr[`NTT_STAGE_CNT-i-1]), .rom_data(rom_data[`NTT_STAGE_CNT-i-1]),
-			.fifo2_addr(fifo_ctrl_if.fifo2_addr),
+			.fifo2_addr(fifo2_addr[i]),
 		.*);
 	end
 	else begin
@@ -39,7 +43,7 @@ for (i=0; i < `NTT_STAGE_CNT-1; i++) begin : stage_loop
 			.in_en(en[i]), .in(data[i]),
 			.out_en(en[i+1]), .out(data[i+1]),
 			.rom_addr(rom_addr[`NTT_STAGE_CNT-i-1]), .rom_data(rom_data[`NTT_STAGE_CNT-i-1]),
-			.fifo1_addr(fifo_ctrl_if.fifom_addr), .fifo2_addr(fifo_ctrl_if.fifo2_addr),
+			.fifo1_addr(fifom_addr), .fifo2_addr(fifo2_addr[i]),
 		.*);
 	end
 	//intt_stage #(.STAGE(i)) staged_intt (
@@ -49,12 +53,15 @@ for (i=0; i < `NTT_STAGE_CNT-1; i++) begin : stage_loop
 	//	.rom_addr(rom_addr[`NTT_STAGE_CNT-i-1]), .rom_data(rom_data[`NTT_STAGE_CNT-i-1]),
 	//.*);
 end
-intt_sf #(.STAGE(i)) staged_intt_f (
-	.clk(gclk[i]),
-	.in_en(en[i]), .in(data[i]),
-	.out_en(en[i+1]), .out(data[i+1]),
-	.rom_addr(rom_addr[`NTT_STAGE_CNT-i-1]), .rom_data(rom_data[`NTT_STAGE_CNT-i-1]),
-	.fifo1_addr(fifo_ctrl_if.fifom_addr),
+
+assign fifo_en[`NTT_STAGE_CNT-1] = en[`NTT_STAGE_CNT-1]|en[`NTT_STAGE_CNT];
+assign gclk[`NTT_STAGE_CNT-1] = clk;
+intt_sf #(.STAGE(`NTT_STAGE_CNT-1)) staged_intt_f (
+	.clk(gclk[`NTT_STAGE_CNT-1]),
+	.in_en(en[`NTT_STAGE_CNT-1]), .in(data[`NTT_STAGE_CNT-1]),
+	.out_en(en[`NTT_STAGE_CNT]), .out(data[`NTT_STAGE_CNT]),
+	.rom_addr(rom_addr[0]), .rom_data(rom_data[0]),
+	.fifo1_addr(fifom_addr),
 .*);
 endgenerate
 endmodule
@@ -62,12 +69,12 @@ endmodule
 `define INTT_SWITCH_CNT_BITS STAGE-1:0
 `define INTT_ROM_BITS `NTT_STAGE_CNT-2:STAGE
 // helf reorder size smaller than mul cycle 
-module intt_ss #(parameter STAGE = `NTT_STAGE_CNT-1)(
+module intt_ss #(parameter STAGE)(
 	input clk,input rst,
 	input in_en,input [`DATA_WIDTH-1:0] in[2],
 	output logic out_en,output logic [`DATA_WIDTH-1:0] out[2],
 	output logic [`NTT_STAGE_CNT-2:0] rom_addr,input [`DATA_WIDTH-1:0] rom_data,
-	input [$clog2(`MUL_STAGE_CNT-1)-1:0] fifo2_addr
+	input [`MAX_FIFO2_ADDR_BITS-1:0] fifo2_addr
 );
 // component output
 logic [`DATA_WIDTH-1:0] add_sub_out[2],mul_result;
@@ -77,12 +84,12 @@ add_sub #(.isNTT(0)) as_i(
 	.in(in),
 	.out(add_sub_out),
 .*);
-
 logic in_en_delay[`ADD_SUB_STAGE_CNT];
 assign in_en_delay[0] = in_en;
 always_ff @(posedge clk) begin
 	for(int i=1; i < `ADD_SUB_STAGE_CNT; i++) in_en_delay[i] <= in_en_delay[i-1];
 end
+
 // counter for control switch & rom
 // prev clock for zeta read
 logic [`NTT_STAGE_CNT-2:0] ctl_cnt;
@@ -103,8 +110,9 @@ mo_mul si_mul(
 // helf reorder size
 localparam HRS = 1<<(STAGE);
 // fifo2
-dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(`MUL_STAGE_CNT-HRS-1)) fifo2(
-	.addr(fifo2_addr),
+localparam fifo2_size = `MUL_STAGE_CNT-HRS-1;
+dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(fifo2_size)) fifo2(
+	.addr($clog2(fifo2_size)'(fifo2_addr)),
 	.in(add_sub_out[0]), .out(fifo2_out), 
 .*);
 
@@ -120,10 +128,21 @@ always_ff @(posedge clk) begin
 end
 
 // fifo1
-dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(HRS),) fifo1(
-	.addr(ctl_cnt[`INTT_SWITCH_CNT_BITS]),
-	.in(switch_data[1]), .out(out[1]), 
-.*);
+generate
+if(STAGE == 0) begin
+	logic tmp_addr;
+	dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(HRS)) fifo1(
+		.addr(tmp_addr),
+		.in(switch_data[1]), .out(out[1]), 
+	.*);
+end
+else begin
+	dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(HRS)) fifo1(
+		.addr(ctl_cnt[`INTT_SWITCH_CNT_BITS]),
+		.in(switch_data[1]), .out(out[1]), 
+	.*);
+end
+endgenerate
 
 // counter for out_en
 localparam out_max_cnt = `MUL_STAGE_CNT;
@@ -145,20 +164,20 @@ module intt_sl #(parameter STAGE = `NTT_STAGE_CNT-1)(
 	input in_en,input [`DATA_WIDTH-1:0] in[2],
 	output logic out_en,output logic [`DATA_WIDTH-1:0] out[2],
 	output logic [`NTT_STAGE_CNT-2:0] rom_addr,input [`DATA_WIDTH-1:0] rom_data,
-	input [$clog2(`MUL_STAGE_CNT-1)-1:0] fifo1_addr, input [SWITCH_INDEX-1:0] fifo2_addr;
+	input [`MUL_STAGE_BITS-1:0] fifo1_addr, input [`MAX_FIFO2_ADDR_BITS-1:0] fifo2_addr
 );
-logic [`DATA_WIDTH-1:0] switch_data,fifo2_out;
+logic [`DATA_WIDTH-1:0] switch_data, fifo2_out, add_sub_out[2], mul_result;
 // add_sub
 add_sub #(.isNTT(0)) as_i(
 	.in(in),
 	.out(add_sub_out),
 .*);
-
 logic in_en_delay[`ADD_SUB_STAGE_CNT];
 assign in_en_delay[0] = in_en;
 always_ff @(posedge clk) begin
 	for(int i=1; i < `ADD_SUB_STAGE_CNT; i++) in_en_delay[i] <= in_en_delay[i-1];
 end
+
 // counter for control switch & rom
 // prev clock for zeta read
 logic [`NTT_STAGE_CNT-2:0] ctl_cnt;
@@ -182,8 +201,9 @@ mo_mul si_mul(
 localparam HRS = 1<<(STAGE);
 // fifo2
 logic [`DATA_WIDTH-1:0] fifo1_out;
-dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(HRS-MUL_STAGE_CNT-1)) fifo2(
-	.addr(fifo2_addr),
+localparam fifo2_size = HRS-`MUL_STAGE_CNT-1;
+dp_ram #(.WIDTH(`DATA_WIDTH*2), .SIZE(fifo2_size)) fifo2(
+	.addr($clog2(fifo2_size)'(fifo2_addr)),
 	.in({mul_result,fifo1_out}), .out({fifo2_out, out[1]}), 
 .*);
 // switch
@@ -219,7 +239,7 @@ module intt_sf #(parameter STAGE = `NTT_STAGE_CNT-1)(
 	input in_en,input [`DATA_WIDTH-1:0] in[2],
 	output logic out_en,output logic [`DATA_WIDTH-1:0] out[2],
 	output logic [`NTT_STAGE_CNT-2:0] rom_addr,input [`DATA_WIDTH-1:0] rom_data,
-	input [$clog2(`MUL_STAGE_CNT-1)-1:0] fifo1_addr
+	input [`MUL_STAGE_BITS-1:0] fifo1_addr
 );
 logic [`DATA_WIDTH-1:0] add_sub_out[2],mul_result;
 add_sub #(.isNTT(0)) as_0(

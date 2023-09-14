@@ -10,7 +10,7 @@ controller for fifo for different size
 
 Require -1 because ram will have a flipflop when output
 
-TODO: clock gating with en.
+TODO: clock gating with fifo_en.
 *********/
 /*
 // designware
@@ -28,13 +28,16 @@ end
 //`define MAX(a,b) ()
 
 module fifo_cts (
-	input clk,
-	fifo_ctrl_io fifo_ctrl_if
+	input clk, input rst,
+	//fifo_ctrl_io fifo_ctrl_if
+	input fifo_en[`NTT_STAGE_CNT],
+	output [`MAX_FIFO2_ADDR_BITS-1:0] fifo2_addr[`NTT_STAGE_CNT],
+	output [`MUL_STAGE_BITS-1:0] fifom_addr
 );
 // mul_stage fifo
 localparam int sizem = `MUL_STAGE_CNT-1;
-fifo_ctrl #(.size(sizem)) fifom_ctrl(
-	.addr(($clog2(sizem))'fifo_ctrl_if.fifom_addr),
+fifo_counter #(.size(sizem)) fifom_ctrl(
+	.addr(fifom_addr),
 .*);
 
 // fifo2
@@ -45,11 +48,14 @@ fifo_ctrl #(.size(sizem)) fifom_ctrl(
 genvar i;
 generate
 for (i=0; i<`NTT_STAGE_CNT-1 ; i++) begin
-	localparam int size2 = abs((1<<(i)) - `MUL_STAGE_CNT) - 1;
-	fifo_ctrl #(.size(size2)) fifo2_ctrl(
-		.addr(($clog2(size2))'fifo_ctrl_if.fifo2_addr[i]),
+	localparam int size2 = `ABS((1<<(i)), `MUL_STAGE_CNT) - 1;
+	logic [$clog2(size2)-1:0] fifo2_tmp_addr;
+	fifo_counter #(.size(size2)) fifo2_ctrl(
+		.addr(fifo2_tmp_addr),
 	.*);
+	assign fifo2_addr[i] = fifo2_tmp_addr;
 end
+endgenerate
 endmodule: fifo_cts
 
 module fifo_counter #(parameter size)(

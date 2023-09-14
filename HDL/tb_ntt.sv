@@ -5,6 +5,10 @@ define NTT,PWM,INTT to test what function you want to test
 
 You may need to edit this to read different data input!
 ***********/
+`include "ntt.svh"
+`include "add_sub.svh"
+`include "mo_mul.svh"
+`include "fifo.svh"
 
 `define CYCLE      10.0
 `define MAX_CYCLE 14000000

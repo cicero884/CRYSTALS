@@ -4,7 +4,7 @@
 TB_TOP_FILE		=	tb_ntt.sv
 TB_MUL_TOP_FILE	=	tb_mul.sv
 # files you want synthesize
-TOP_FILE	=	top_ntt.sv add_sub.sv fifo.sv mo_mul.sv ntt.sv zeta_rom.sv intt.sv
+TOP_FILE	=	top_ntt.sv add_sub.sv fifo.sv mo_mul.sv ntt.sv zeta_rom.sv intt.sv 
 MUL_TOP_FILE	=	mo_mul.sv
 # top module
 TOP			=	top_ntt
@@ -51,13 +51,13 @@ gtech_ntt: rom_data
 		-sverilog \
 		-l ntt.log \
 		+define+NTT \
+		+vcs+fsdbon \
+		+fsdb+mda \
+		+access+R \
+		+fsdbfile+ntt.fsdb \
 		+define+Q=$(Q) \
 		+define+NTT_STAGE_CNT=$(N)-1
 # FIXME: NTT_STAGE_CNT = N-1?
-#+vcs+fsdbon \
-#+fsdb+mda \
-#+access+R \
-#+fsdbfile+ntt.fsdb \
 
 gtech_intt: rom_data
 	vcs -R $(TB_TOP_FILE) $(TOP_FILE) \

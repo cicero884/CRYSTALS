@@ -17,7 +17,7 @@ initial begin
 	//$readmemh($sformatf("rom_%0d.rom", STAGE), rom);
 
 	// I know this is dumb, but I cant find better way for vivodo 2018
-	localparam bit [7:0] asscii_index = '0' + STAGE;
+	localparam bit [7:0] asscii_index = "0" + STAGE;
 	localparam fname = {"rom_",asscii_index,".rom"};
 	if(STAGE > 9) begin
 		$display("ERROR! the STAGE is over one digit, consider fix it in zeta_rom");
