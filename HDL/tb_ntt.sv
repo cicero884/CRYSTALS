@@ -5,7 +5,6 @@ define NTT,PWM,INTT to test what function you want to test
 
 You may need to edit this to read different data input!
 ***********/
-`include "ntt.svh"
 
 `define CYCLE      10.0
 `define MAX_CYCLE 14000000
@@ -36,17 +35,18 @@ initial begin
 	fd_in = $fopen("ntt_in.txt","r");
 	fd_in2 = 1;
 	fd_out = $fopen("ntt_out.txt","r");
-	`elsif PWM
+`elsif PWM
 	fd_in = $fopen("pwm1_in.txt","r");
 	fd_in2 = $fopen("pwm2_in.txt","r");
 	fd_out = $fopen("pwm_out.txt","r");
-	`elsif INTT
+`elsif INTT
 	fd_in = $fopen("intt_in.txt","r");
 	fd_in2 = 1;
 	fd_out = $fopen("intt_out.txt","r");
 `else
-	$display("please define 'NTT' or 'PWN' or 'INTT'.");
-	$finish
+	//$display("please define 'NTT' or 'PWN' or 'INTT'.");
+	//$finish
+	`define NTT
 `endif
 	if (!(fd_in && fd_in2 && fd_out)) begin
 		$display("Failed open test data");

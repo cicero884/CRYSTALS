@@ -9,7 +9,6 @@ TODO: optmize every stage to FA & HA
 input: a,b (RANGE:unsigned 0~Q)
 output: result = a*b*2^^(WIDTH) %Q (RANGE: 0~Q or 0~2^^(WIDTH)-1, depend on a)
 ************/
-`include "ntt.svh"
 
 module mo_mul #(parameter WIDTH=`DATA_WIDTH)(
 	input clk,

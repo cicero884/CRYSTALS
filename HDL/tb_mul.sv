@@ -4,8 +4,6 @@ testbench for check correct of mo_mul
 
 `define CYCLE 10.0
 
-`include "ntt.svh"
-`include "mo_mul.svh"
 module tb_mul();
 logic clk = '0;
 logic rst;

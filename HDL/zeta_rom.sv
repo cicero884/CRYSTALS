@@ -2,18 +2,28 @@
 zeta_rom
 *************/
 
-`include "ntt.svh"
-
 module duel_rom #(parameter STAGE)(
 	input clk,
 	input [STAGE-1:0] addr[2],
 	output logic [`DATA_WIDTH-1:0] data[2]
 );
 logic [`DATA_WIDTH-1:0] rom[(1<<STAGE)];
-string filename;
+
+
+//string fname;
+
 initial begin
-	$sformat(filename, "rom_%0d.rom",STAGE);
-	$readmemh(filename, rom);
+    //$sformat(fname ,"rom_%0d.rom", STAGE);
+	//$readmemh($sformatf("rom_%0d.rom", STAGE), rom);
+
+	// I know this is dumb, but I cant find better way for vivodo 2018
+	localparam bit [7:0] asscii_index = '0' + STAGE;
+	localparam fname = {"rom_",asscii_index,".rom"};
+	if(STAGE > 9) begin
+		$display("ERROR! the STAGE is over one digit, consider fix it in zeta_rom");
+		$finish;
+	end
+	$readmemh(fname, rom);
 end
 
 always_ff @(posedge clk) begin
