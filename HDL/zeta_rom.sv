@@ -1,29 +1,6 @@
 /************
 zeta_rom
 *************/
-function string get_path_from_file(string fullpath_filename);
-    int i;
-    int str_index;
-    logic found_path;
-    string ret="";
-
-
-    for (i = fullpath_filename.len()-1; i>0; i=i-1) begin
-        if (fullpath_filename[i] == "/") begin
-            found_path=1;
-            str_index=i;
-            break;
-        end
-    end
-    if (found_path==1) begin
-        ret=fullpath_filename.substr(0,str_index);
-    end else begin
-       // `uvm_error("pve_get_path_from_file-1", $sformatf("Not found a valid path for this file: %s",fullpath_filename));
-    end
-
-
-    return ret;
-endfunction
 
 module duel_rom #(parameter STAGE)(
 	input clk,
@@ -76,9 +53,13 @@ assign rom_data[1][0] = rom_0[0];
 genvar i;
 generate
 for (i=1; i < `NTT_STAGE_CNT; i++) begin
+	logic [`NTT_STAGE_CNT-2:0] tmp_rom_addr[2];
+	logic [`DATA_WIDTH-1:0]tmp_rom_data[2];
+	assign tmp_rom_addr = '{rom_addr[0][i],rom_addr[1][i]};
+	assign tmp_rom_data = '{rom_data[0][i],rom_data[1][i]};
 	duel_rom #(i) zeta_splited(
-		.addr('{rom_addr[0][i],rom_addr[1][i]}),
-		.data('{rom_data[0][i],rom_data[1][i]}),
+		.addr(tmp_rom_addr),
+		.data(tmp_rom_data),
 	.*);
 end
 endgenerate

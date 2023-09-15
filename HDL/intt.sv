@@ -271,7 +271,6 @@ always_ff @(posedge clk,posedge rst) begin
 end
 endmodule: intt_sf
 
-*/
 //TODO:more specific clock gating?
 /*
 `ifdef CLK_GATING

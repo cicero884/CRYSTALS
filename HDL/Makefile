@@ -50,13 +50,13 @@ gtech_ntt: rom_data
 		-sverilog \
 		-l ntt.log \
 		+define+NTT \
-		+vcs+fsdbon \
-		+fsdb+mda \
-		+access+R \
-		+fsdbfile+ntt.fsdb \
 		+define+Q=$(Q) \
 		+define+NTT_STAGE_CNT=$(N)-1
 # FIXME: NTT_STAGE_CNT = N-1?
+#+vcs+fsdbon \
+#+fsdb+mda \
+#+access+R \
+#+fsdbfile+ntt.fsdb \
 
 gtech_intt: rom_data
 	vcs -R $(TB_TOP_FILE) $(TOP_FILE) \
@@ -74,11 +74,15 @@ gtech_intt: rom_data
 nw:
 	nWave -f *.fsdb -sswr signal.rc +access+r
 
-syn syn/$(TOP)_syn.v:
+syn syn/$(TOP)_syn.v: rom_data
 ifneq ($(wildcard ./syn),)
-	dcnxt_shell -f syn/syn.tcl | tee syn.log;
+	dc_shell -f syn/syn.tcl -output_log_file syn.log -x \
+		"	set top $(TOP); \
+			set src_file {$(TOP_FILE)}; \
+			set sdc_file $(SDC); \
+		";
 else
-	@echo "Require syn folder with syn.tcl inside!"
+	@echo "syn folder with syn.tcl & tsmc13_neg.v inside require!"
 endif
 
 gate: syn/$(TOP)_syn.v

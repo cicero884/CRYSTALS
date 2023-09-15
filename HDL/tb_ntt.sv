@@ -9,6 +9,7 @@ You may need to edit this to read different data input!
 `include "add_sub.svh"
 `include "mo_mul.svh"
 `include "fifo.svh"
+`define TB_PATH "."
 //`define TB_PATH "~/code/kyber/"
 //`define NTT
 

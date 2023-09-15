@@ -1,10 +1,9 @@
 `ifndef NTT_SVH
 `define NTT_SVH
-// FIXME: temperary set there for vivodo
+
+// FIXME: edit it in syn
 `define Q 3329
 `define NTT_STAGE_CNT 7
-`define TB_PATH "/home/cicero/code/kyber/ref/"
-`define NTT
 
 
 

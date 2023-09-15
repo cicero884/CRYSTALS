@@ -80,8 +80,10 @@ mo_mul s0_mul(
 	.result(mul_result),
 .*);
 
+logic [`DATA_WIDTH-1:0] add_sub_in[2];
+assign add_sub_in = '{fifo1_out,mul_result};
 add_sub #(.isNTT(1)) as_0(
-	.in('{fifo1_out,mul_result}),
+	.in(add_sub_in),
 	.out(out),
 .*);
 
@@ -148,8 +150,10 @@ mo_mul si_mul(
 .*);
 
 // add_sub
+logic [`DATA_WIDTH-1:0] add_sub_in[2];
+assign add_sub_in = '{switch_data[0], fifo2_out[1]};
 add_sub #(.isNTT(1)) as_l(
-	.in('{switch_data[0], fifo2_out[1]}),
+	.in(add_sub_in),
 	.out(out),
 .*);
 
@@ -224,8 +228,10 @@ dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(fifo2_size)) fifo2(
 	.in(switch_data[0]), .out(fifo2_out), 
 .*);
 // add_sub
+logic [`DATA_WIDTH-1:0] add_sub_in[2];
+assign add_sub_in = '{fifo2_out, mul_result};
 add_sub #(.isNTT(1)) as_s(
-	.in('{fifo2_out, mul_result}),
+	.in(add_sub_in),
 	.out(out),
 .*);
 // out_en

@@ -2,13 +2,14 @@
 set_host_options -max_cores 16
 
 # Read all Files
-set top rails
-read_file -autoread -top ${top} {./rails.v} -library ${top}
+
+#set top geofence
+read_file -autoread -top ${top} ${src_file} -library ${top}
 current_design ${top}
 link
 
 # Setting Clock Constraits
-source -echo -verbose ${top}.sdc
+source -echo -verbose ${sdc_file}
 
 # High fanout threshold
 # set high_fanout_net_threshold 0
@@ -16,9 +17,9 @@ report_net_fanout -high_fanout
 
 uniquify
 set_fix_multiple_port_nets -all -buffer_constants [get_designs *]
- 
+
 set_structure -timing true
- 
+
 check_design
 
 # Synthesize (ultimate)
@@ -26,9 +27,9 @@ compile_ultra -no_autoungroup -no_boundary_optimization -retime -gate_clock
 compile_ultra -incremental
 
 current_design [get_designs ${top}]
- 
+
 remove_unconnected_ports -blast_buses [get_cells -hierarchical *]
- 
+
 set bus_inference_style {%s[%d]}
 set bus_naming_style {%s[%d]}
 set hdlout_internal_busses true
