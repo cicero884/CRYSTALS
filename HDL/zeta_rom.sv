@@ -1,6 +1,29 @@
 /************
 zeta_rom
 *************/
+function string get_path_from_file(string fullpath_filename);
+    int i;
+    int str_index;
+    logic found_path;
+    string ret="";
+
+
+    for (i = fullpath_filename.len()-1; i>0; i=i-1) begin
+        if (fullpath_filename[i] == "/") begin
+            found_path=1;
+            str_index=i;
+            break;
+        end
+    end
+    if (found_path==1) begin
+        ret=fullpath_filename.substr(0,str_index);
+    end else begin
+       // `uvm_error("pve_get_path_from_file-1", $sformatf("Not found a valid path for this file: %s",fullpath_filename));
+    end
+
+
+    return ret;
+endfunction
 
 module duel_rom #(parameter STAGE)(
 	input clk,
@@ -18,7 +41,8 @@ initial begin
 
 	// I know this is dumb, but I cant find better way for vivodo 2018
 	localparam bit [7:0] asscii_index = "0" + STAGE;
-	localparam fname = {"rom_",asscii_index,".rom"};
+	//localparam path = get_path_from_file(`__FILE__);
+	localparam fname = {"rom_",asscii_index,".mem"};
 	if(STAGE > 9) begin
 		$display("ERROR! the STAGE is over one digit, consider fix it in zeta_rom");
 		$finish;
@@ -43,7 +67,8 @@ module zeta_rom(
 // rom_0 (only one number inside)
 logic [`DATA_WIDTH-1:0] rom_0[1];
 initial begin
-	$readmemh("rom_0.rom",rom_0);
+	//localparam path = get_path_from_file(`__FILE__);
+	$readmemh("rom_0.mem",rom_0);
 end
 assign rom_data[0][0] = rom_0[0];
 assign rom_data[1][0] = rom_0[0];

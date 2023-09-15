@@ -10,7 +10,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-unsigned zeta, bit_size;
+unsigned bit_size;
 long long unsigned Q;
 // return MSB*2
 long long unsigned MSB_2(long long unsigned msb_q){
@@ -20,15 +20,26 @@ long long unsigned MSB_2(long long unsigned msb_q){
 	return msb_q+1;
 }
 int main(int argc,char *argv[]){
-	if(argc != 4){
-		printf("input : argv1=root of unity, argv2=log2(poly size), argv3=Q\n");
+	if(argc < 3){
+		printf("input : argv1=log2(poly size), argv2=Q, [argv3=root of unity]\n");
 		printf("for kyber is 17 8 3329\n");
-		printf("ex: %s 17 8 3329\n",argv[0]);
+		printf("ex: %s 8 3329 17\n",argv[0]);
+		printf("or: %s 8 3329\n",argv[0]);
 		return 1;
 	}
-	zeta = atoi(argv[1]);
-	bit_size = atoi(argv[2])-1;
-	Q = atoi(argv[3]);
+	bit_size = atoi(argv[1])-1;
+	Q = atoi(argv[2]);
+	long long unsigned zeta;
+	if(argc == 3){
+		for(long long unsigned i=2; i<Q; i++){
+			long long unsigned tmp = i;
+			zeta = i;
+			for(int j=0; j<bit_size; j++) tmp=(tmp*tmp)%Q;
+			if(tmp == Q-1) break;
+		}
+		printf("zeta: %llu", zeta);
+	}
+	else zeta = atoi(argv[1]);
 
 	unsigned zeta_2[bit_size];
 	zeta_2[0] = zeta;
@@ -57,7 +68,7 @@ int main(int argc,char *argv[]){
 
 		if(!(i&(i-1))){
 			if(fd) fclose(fd);
-			sprintf(fname,"rom_%d.rom",rom_index);
+			sprintf(fname,"rom_%d.mem",rom_index);
 			fd = fopen(fname,"w");
 			rom_index++;
 		}

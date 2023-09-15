@@ -9,11 +9,14 @@ You may need to edit this to read different data input!
 `include "add_sub.svh"
 `include "mo_mul.svh"
 `include "fifo.svh"
+//`define TB_PATH "~/code/kyber/"
+//`define NTT
 
 `define CYCLE      10.0
 `define MAX_CYCLE 14000000
 
 `define DATA_SIZE (2<<`NTT_STAGE_CNT)
+
 
 module tb_ntt();
 
@@ -36,21 +39,21 @@ int fd_in2;
 initial begin
 	rst = '0;
 `ifdef NTT
-	fd_in = $fopen("ntt_in.txt","r");
+	fd_in = $fopen({`TB_PATH,"/ntt_in.dat"},"r");
 	fd_in2 = 1;
-	fd_out = $fopen("ntt_out.txt","r");
+	fd_out = $fopen({`TB_PATH,"/ntt_out.dat"},"r");
 `elsif PWM
-	fd_in = $fopen("pwm1_in.txt","r");
-	fd_in2 = $fopen("pwm2_in.txt","r");
-	fd_out = $fopen("pwm_out.txt","r");
+	fd_in = $fopen({`TB_PATH,"/pwm1_in.dat"},"r");
+	fd_in2 = $fopen({`TB_PATH,"/pwm2_in.dat"},"r");
+	fd_out = $fopen({`TB_PATH,"/pwm_out.dat"},"r");
 `elsif INTT
-	fd_in = $fopen("intt_in.txt","r");
+	fd_in = $fopen({`TB_PATH,"/intt_in.dat"},"r");
 	fd_in2 = 1;
-	fd_out = $fopen("intt_out.txt","r");
+	fd_out = $fopen({`TB_PATH,"/intt_out.dat"},"r");
 `else
-	//$display("please define 'NTT' or 'PWN' or 'INTT'.");
-	//$finish
-	`define NTT
+	$display("please define 'NTT' or 'PWN' or 'INTT'.");
+	$display("require define things like Q=3329,NTT_STAGE_CNT=7,TB_PATH=\"~/code/kyber/\",\"NTT\"");
+	$finish;
 `endif
 	if (!(fd_in && fd_in2 && fd_out)) begin
 		$display("Failed open test data");
@@ -103,6 +106,7 @@ always_comb begin
 	end
 end
 
+
 top_ntt u_top_ntt(
 	.ntt_in_en(in_en), .ntt_in(in),
 	.ntt_out_en(out_en), .ntt_out(out),
@@ -111,6 +115,19 @@ top_ntt u_top_ntt(
 	.pwm_in_en('0), .pwm_in('{in,in2}),
 	.pwm_out_en(en_ignore[1]), .pwm_out(data_ignore[1]),
 .*);
+
+
+// for post sim in vivodo =_=
+/*
+top_ntt u_top_ntt(
+	.ntt_in_en(in_en), .\ntt_in[0] (in[0]), .\ntt_in[1] (in[1]),
+	.ntt_out_en(out_en), .\ntt_out[0] (out[0]), .\ntt_out[1] (out[1]),
+	.intt_in_en('0), .\intt_in[0] (in[0]), .\intt_in[1] (in[1]),
+	.intt_out_en(en_ignore[0]), .\intt_out[0] (data_ignore[0][0]),.\intt_out[1] (data_ignore[0][1]),
+	.pwm_in_en('0), .\pwm_in[0][0] (in[0]), .\pwm_in[0][1] (in[1]),.\pwm_in[1][0] (in2[0]), .\pwm_in[1][1] (in2[1]),
+	.pwm_out_en(en_ignore[1]), .\pwm_out[0] (data_ignore[1][0]), .\pwm_out[1] (data_ignore[1][1]),
+.*);
+*/
 
 `elsif PWM
 always_comb begin

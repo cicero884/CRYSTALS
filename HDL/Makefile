@@ -11,7 +11,6 @@ TOP			=	top_ntt
 
 PASS_STR	=	"ALL PASS"
 
-root_of_unit	=	17
 Q				=	3329
 N				=	8
 
@@ -34,7 +33,7 @@ all: gtech_ntt syn gate
 
 rom_data: zeta2rom.c
 	gcc zeta2rom.c -o zeta2rom -std=c99
-	./zeta2rom $(root_of_unit) $(N) $(Q)
+	./zeta2rom $(N) $(Q)
 
 mul_test:
 	vcs -R $(TB_MUL_TOP_FILE) $(MUL_TOP_FILE) \

@@ -2,6 +2,10 @@
 top_ntt
 example of usage this module
 **********/
+`include "ntt.svh"
+`include "add_sub.svh"
+`include "mo_mul.svh"
+`include "fifo.svh"
 
 module top_ntt(
 	input clk, input rst,
@@ -53,13 +57,13 @@ ntt u_ntt(
 	.fifo2_addr(fifo2_ntt_addr),
 .*);
 
-intt u_intt(
-	.in_en(intt_in_en), .in(intt_in),
-	.out_en(intt_out_en), .out(intt_out),
-	.rom_addr(rom_addr[1]), .rom_data(rom_data[1]),
-	.fifo_en(intt_en[0]),
-	.fifo2_addr(fifo2_intt_addr),
-.*);
+//intt u_intt(
+//	.in_en(intt_in_en), .in(intt_in),
+//	.out_en(intt_out_en), .out(intt_out),
+//	.rom_addr(rom_addr[1]), .rom_data(rom_data[1]),
+//	.fifo_en(intt_en[0]),
+//	.fifo2_addr(fifo2_intt_addr),
+//.*);
 
 // for pwm
 endmodule
