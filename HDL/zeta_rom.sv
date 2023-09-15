@@ -53,10 +53,10 @@ assign rom_data[1][0] = rom_0[0];
 genvar i;
 generate
 for (i=1; i < `NTT_STAGE_CNT; i++) begin
-	logic [`NTT_STAGE_CNT-2:0] tmp_rom_addr[2];
+	logic [i-1:0] tmp_rom_addr[2];
 	logic [`DATA_WIDTH-1:0]tmp_rom_data[2];
 	assign tmp_rom_addr = '{rom_addr[0][i],rom_addr[1][i]};
-	assign tmp_rom_data = '{rom_data[0][i],rom_data[1][i]};
+	assign '{rom_data[0][i],rom_data[1][i]} = tmp_rom_data;
 	duel_rom #(i) zeta_splited(
 		.addr(tmp_rom_addr),
 		.data(tmp_rom_data),

@@ -10,7 +10,7 @@ You may need to edit this to read different data input!
 `include "mo_mul.svh"
 `include "fifo.svh"
 `define TB_PATH "."
-//`define TB_PATH "~/code/kyber/"
+//`define TB_PATH "/home/cicero/code/kyber/ref"
 //`define NTT
 
 `define CYCLE      10.0
