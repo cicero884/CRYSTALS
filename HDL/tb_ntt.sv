@@ -9,9 +9,8 @@ You may need to edit this to read different data input!
 `include "add_sub.svh"
 `include "mo_mul.svh"
 `include "fifo.svh"
-`define TB_PATH "."
-//`define TB_PATH "/home/cicero/code/kyber/ref"
-//`define NTT
+`define TB_PATH "/home/cicero/code/kyber/ref"
+`define NTT
 
 `define CYCLE      10.0
 `define MAX_CYCLE 14000000

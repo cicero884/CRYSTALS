@@ -181,17 +181,18 @@ module ntt_ss #(parameter SWITCH_INDEX)(
 	input [`MAX_FIFO2_ADDR_BITS-1:0] fifo2_addr
 );
 logic [`NTT_STAGE_CNT-2:0] ctl_cnt;
-logic [`DATA_WIDTH-1:0] in1_delay;
+logic [`DATA_WIDTH-1:0] in1_delay, switch_delay;
 // counter for control switch & rom
 always_ff @(posedge clk) begin
 	// init to 0 because there will one clock delay before data in
 	if (in_en|out_en) ctl_cnt <= ctl_cnt-1;
-	else ctl_cnt <= '0;
+	else ctl_cnt <= '1;
+	switch_delay <= ctl_cnt[SWITCH_INDEX];
 
 	in1_delay <=in[1];
 end
 // FIXME(may cause critical path?)
-assign rom_addr = (ctl_cnt-1)>>SWITCH_INDEX;
+assign rom_addr = ctl_cnt[`NTT_ROM_BITS];
 logic [`DATA_WIDTH-1:0] switch_data[2], fifo1_out, mul_result;
 always_comb begin
 	if(ctl_cnt[SWITCH_INDEX]) switch_data = '{fifo1_out, in1_delay};
