@@ -68,22 +68,19 @@ int main(int argc,char *argv[]){
 
 		if(!(i&(i-1))){
 			if(fd) {
-				fprintf(fd, ";\nEND;");
+				fprintf(fd, ";\n");
 				fclose(fd);
 			}
-			sprintf(fname,"rom_%d.mif",rom_index);
+			sprintf(fname,"rom_%d.coe",rom_index);
 			fd = fopen(fname,"w");
-			fprintf(fd, "DEPTH = %d;\n",(1<<rom_index));
-			fprintf(fd, "WIDTH = %d;\n",64-__builtin_clzll(Q));
-			fprintf(fd, "ADDRESS_RADIX = HEX;\n");
-			fprintf(fd, "DATA_RADIX = HEX;\n");
-			fprintf(fd, "CONTENT\nBEGIN\n0: ");
+			fprintf(fd, "memory_initialization_radix=16;\n");
+			fprintf(fd, "memory_initialization_vector=\n");
 			rom_index++;
 		}
-		else fprintf(fd," ");
+		else fprintf(fd,",\n");
 		fprintf(fd,"%x",out_num);
 	}
-	fprintf(fd, ";\nEND;");
+	fprintf(fd, ";\n");
 	fclose(fd);
 	return 0;
 }
