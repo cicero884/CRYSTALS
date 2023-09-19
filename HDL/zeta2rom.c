@@ -37,7 +37,7 @@ int main(int argc,char *argv[]){
 			for(int j=0; j<bit_size; j++) tmp=(tmp*tmp)%Q;
 			if(tmp == Q-1) break;
 		}
-		printf("zeta: %llu", zeta);
+		printf("zeta: %llu\n", zeta);
 	}
 	else zeta = atoi(argv[1]);
 
@@ -67,14 +67,23 @@ int main(int argc,char *argv[]){
 		out_num = (out_num * MSB_2(Q)) % Q;
 
 		if(!(i&(i-1))){
-			if(fd) fclose(fd);
-			sprintf(fname,"rom_%d.mem",rom_index);
+			if(fd) {
+				fprintf(fd, ";\nEND;");
+				fclose(fd);
+			}
+			sprintf(fname,"rom_%d.mif",rom_index);
 			fd = fopen(fname,"w");
+			fprintf(fd, "DEPTH = %d;\n",(1<<rom_index));
+			fprintf(fd, "WIDTH = %d;\n",64-__builtin_clzll(Q));
+			fprintf(fd, "ADDRESS_RADIX = HEX;\n");
+			fprintf(fd, "DATA_RADIX = HEX;\n");
+			fprintf(fd, "CONTENT\nBEGIN\n0: ");
 			rom_index++;
 		}
 		else fprintf(fd," ");
 		fprintf(fd,"%x",out_num);
 	}
+	fprintf(fd, ";\nEND;");
 	fclose(fd);
 	return 0;
 }
