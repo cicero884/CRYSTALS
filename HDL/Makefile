@@ -8,6 +8,7 @@ TOP_FILE	=	top_ntt.sv add_sub.sv fifo.sv mo_mul.sv ntt.sv zeta_rom.sv intt.sv
 MUL_TOP_FILE	=	mo_mul.sv
 # top module
 TOP			=	top_ntt
+SDC			=	syn/$(TOP).sdc
 
 PASS_STR	=	"ALL PASS"
 
@@ -49,14 +50,14 @@ gtech_ntt: rom_data
 	vcs -R $(TB_TOP_FILE) $(TOP_FILE) \
 		-sverilog \
 		-l ntt.log \
+		+vcs+fsdbon \
+		+fsdb+mda \
+		+access+R \
+		+fsdbfile+ntt.fsdb \
 		+define+NTT \
 		+define+Q=$(Q) \
 		+define+NTT_STAGE_CNT=$(N)-1
 # FIXME: NTT_STAGE_CNT = N-1?
-#+vcs+fsdbon \
-#+fsdb+mda \
-#+access+R \
-#+fsdbfile+ntt.fsdb \
 
 gtech_intt: rom_data
 	vcs -R $(TB_TOP_FILE) $(TOP_FILE) \
@@ -85,13 +86,24 @@ else
 	@echo "syn folder with syn.tcl & tsmc13_neg.v inside require!"
 endif
 
-gate: syn/$(TOP)_syn.v
-	rm syn/$(TOP)_syn.v
-	vcs -R $(TB_TOP_FILE) $(TOP)_syn.v \
+gate_ntt: syn
+	vcs -R $(TB_TOP_FILE) syn/$(TOP)_syn.v syn/tsmc13_neg.v \
+		-sverilog \
 		-debug_access+all \
 		-diag=sdf:verbose \
+		+vcs+fsdbon \
+		+fsdb+mda \
+		+access+R \
+		+fsdbfile+gate_ntt.fsdb \
+		+neg_tchk \
+		-notice \
+		+lint=TFIPC-L \
 		-debug_region+cell +memcbk \
-		-l gtech.log
+		+define+SDF \
+		-l gate_ntt.log \
+		+define+NTT \
+		+define+Q=$(Q) \
+		+define+NTT_STAGE_CNT=$(N)-1
 	#-v sim_model.v
 #	irun $(TB_TOP_FILE) syn/$(TOP)_syn.v -v syn/tsmc13_neg.v \
 #		+access+r \
@@ -100,7 +112,7 @@ gate: syn/$(TOP)_syn.v
 #		+define+SDFFILE=\"syn/$(TOP)_syn.sdf\" \
 #		-append_log
 #	mv irun.log gate.log
-	vcd2saif -i *.vcd -o ntt.saif
+#	vcd2saif -i *.vcd -o ntt.saif
 
 clean:
 	rm ./*.err ./*.log syn/$(TOP)_syn* *.fsdb irun.history -f

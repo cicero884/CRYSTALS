@@ -70,7 +70,7 @@ module ntt_s0(
 );
 logic [`DATA_WIDTH-1:0] fifo1_out, mul_result;
 dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(`MUL_STAGE_CNT-1)) s0_fifo(
-	.addr(fifo1_addr),
+	.addr(`MUL_STAGE_BITS'(fifo1_addr)),
 	.in(in[0]), .out(fifo1_out), 
 .*);
 
@@ -98,7 +98,7 @@ always_ff @(posedge clk,posedge rst) begin
 	else begin
 		if(in_en ^ out_en) begin
 			if(out_cnt < out_max_cnt) out_cnt <= out_cnt + 1;
-			else out_en <= !out_en;
+			else out_en <= in_en;
 		end
 		else out_cnt <= '0;
 	end
@@ -140,7 +140,7 @@ dp_ram #(.WIDTH(`DATA_WIDTH*2), .SIZE(fifo2_size)) fifo2(
 .*);
 // fifo1
 dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(`MUL_STAGE_CNT-1)) fifo1(
-	.addr(fifo1_addr),
+	.addr(`MUL_STAGE_BITS'(fifo1_addr)),
 	.in(fifo2_out[0]), .out(fifo1_out), 
 .*);
 // mul with zeta
@@ -180,23 +180,24 @@ module ntt_ss #(parameter SWITCH_INDEX)(
 	output logic [`NTT_STAGE_CNT-2:0] rom_addr,input [`DATA_WIDTH-1:0] rom_data,
 	input [`MAX_FIFO2_ADDR_BITS-1:0] fifo2_addr
 );
-logic [`NTT_STAGE_CNT-2:0] ctl_cnt;
-logic [`DATA_WIDTH-1:0] in1_delay, switch_delay;
+logic [`NTT_STAGE_CNT-2:0] ctl_cnt, ctl_delay;
+logic [`DATA_WIDTH-1:0] in1_delay;
+//logic switch_delay;
 // counter for control switch & rom
 always_ff @(posedge clk) begin
 	// init to 0 because there will one clock delay before data in
 	if (in_en|out_en) ctl_cnt <= ctl_cnt-1;
 	else ctl_cnt <= '1;
-	switch_delay <= ctl_cnt[SWITCH_INDEX];
+	ctl_delay <= ctl_cnt;
 
 	in1_delay <=in[1];
 end
-// FIXME(may cause critical path?)
-assign rom_addr = ctl_cnt[`NTT_ROM_BITS];
+assign rom_addr = ctl_delay[`NTT_ROM_BITS];
 logic [`DATA_WIDTH-1:0] switch_data[2], fifo1_out, mul_result;
-always_comb begin
-	if(ctl_cnt[SWITCH_INDEX]) switch_data = '{fifo1_out, in1_delay};
-	else switch_data = '{in1_delay, fifo1_out};
+//FIXME: cause not pass syn?
+always_ff @(posedge clk) begin
+	if(ctl_delay[SWITCH_INDEX]) switch_data <= '{fifo1_out, in1_delay};
+	else switch_data <= '{in1_delay, fifo1_out};
 end
 // mul with zeta
 mo_mul si_mul(
@@ -207,11 +208,16 @@ mo_mul si_mul(
 // fifo1
 generate
 if (SWITCH_INDEX == 0) begin
-	logic tmp_addr;
-	dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(`HRS)) fifo1(
-		.addr(tmp_addr),
-		.in(in[0]), .out(fifo1_out), 
-	.*);
+	logic [`DATA_WIDTH-1:0] fifo1_tmp;
+	always_ff @(posedge clk) begin
+		fifo1_tmp <= in[0];
+		fifo1_out <= fifo1_tmp;
+	end
+//	logic tmp_addr;
+//	dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(`HRS)) fifo1(
+//		.addr($clog2(`HRS)'(tmp_addr)),
+//		.in(in[0]), .out(fifo1_out), 
+//	.*);
 end
 else begin
 	dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(`HRS)) fifo1(
@@ -236,14 +242,14 @@ add_sub #(.isNTT(1)) as_s(
 	.out(out),
 .*);
 // out_en
-localparam out_max_cnt = `MUL_STAGE_CNT+`ADD_SUB_STAGE_CNT;
+localparam out_max_cnt = `MUL_STAGE_CNT+`ADD_SUB_STAGE_CNT+1;
 always_ff @(posedge clk,posedge rst) begin
 	if(rst) begin
 		out_en <= '0;
 	end
 	else begin
 		if(in_en ^ out_en) begin
-			if(signed'(ctl_cnt) <= -out_max_cnt) out_en <= in_en;
+			if(signed'(ctl_cnt) < -out_max_cnt) out_en <= in_en;
 		end
 	end
 end

@@ -1,0 +1,107 @@
+# operating conditions and boundary conditions #
+
+#create_clock -period 10.000 -name clk [get_ports clk]
+
+set_dont_touch_network      [all_clocks]
+set_fix_hold                [all_clocks]
+set_clock_uncertainty 0.200 [all_clocks]
+set_clock_uncertainty 0.200 [all_clocks]
+set_clock_latency 0.500 [all_clocks]
+set_clock_latency 0.500 [all_clocks]
+#set_ideal_network           [get_ports clk]
+
+
+#Don't touch the basic env setting as below
+#set_input_delay  0   -clock clk [remove_from_collection [all_inputs] [get_ports clk]] -clock_fall
+set_output_delay -clock clk -clock_fall 0.000 [all_outputs]
+set_output_delay -clock clk -clock_fall 0.000 [all_outputs]
+
+set_property LOAD 1 [get_ports {intt_out1[0]}]
+set_property LOAD 1 [get_ports {intt_out1[10]}]
+set_property LOAD 1 [get_ports {intt_out1[11]}]
+set_property LOAD 1 [get_ports {intt_out1[1]}]
+set_property LOAD 1 [get_ports {intt_out1[2]}]
+set_property LOAD 1 [get_ports {intt_out1[3]}]
+set_property LOAD 1 [get_ports {intt_out1[4]}]
+set_property LOAD 1 [get_ports {intt_out1[5]}]
+set_property LOAD 1 [get_ports {intt_out1[6]}]
+set_property LOAD 1 [get_ports {intt_out1[7]}]
+set_property LOAD 1 [get_ports {intt_out1[8]}]
+set_property LOAD 1 [get_ports {intt_out1[9]}]
+set_property LOAD 1 [get_ports {intt_out2[0]}]
+set_property LOAD 1 [get_ports {intt_out2[10]}]
+set_property LOAD 1 [get_ports {intt_out2[11]}]
+set_property LOAD 1 [get_ports {intt_out2[1]}]
+set_property LOAD 1 [get_ports {intt_out2[2]}]
+set_property LOAD 1 [get_ports {intt_out2[3]}]
+set_property LOAD 1 [get_ports {intt_out2[4]}]
+set_property LOAD 1 [get_ports {intt_out2[5]}]
+set_property LOAD 1 [get_ports {intt_out2[6]}]
+set_property LOAD 1 [get_ports {intt_out2[7]}]
+set_property LOAD 1 [get_ports {intt_out2[8]}]
+set_property LOAD 1 [get_ports {intt_out2[9]}]
+set_property LOAD 1 [get_ports intt_out_en]
+set_property LOAD 1 [get_ports {ntt_out1[0]}]
+set_property LOAD 1 [get_ports {ntt_out1[10]}]
+set_property LOAD 1 [get_ports {ntt_out1[11]}]
+set_property LOAD 1 [get_ports {ntt_out1[1]}]
+set_property LOAD 1 [get_ports {ntt_out1[2]}]
+set_property LOAD 1 [get_ports {ntt_out1[3]}]
+set_property LOAD 1 [get_ports {ntt_out1[4]}]
+set_property LOAD 1 [get_ports {ntt_out1[5]}]
+set_property LOAD 1 [get_ports {ntt_out1[6]}]
+set_property LOAD 1 [get_ports {ntt_out1[7]}]
+set_property LOAD 1 [get_ports {ntt_out1[8]}]
+set_property LOAD 1 [get_ports {ntt_out1[9]}]
+set_property LOAD 1 [get_ports {ntt_out2[0]}]
+set_property LOAD 1 [get_ports {ntt_out2[10]}]
+set_property LOAD 1 [get_ports {ntt_out2[11]}]
+set_property LOAD 1 [get_ports {ntt_out2[1]}]
+set_property LOAD 1 [get_ports {ntt_out2[2]}]
+set_property LOAD 1 [get_ports {ntt_out2[3]}]
+set_property LOAD 1 [get_ports {ntt_out2[4]}]
+set_property LOAD 1 [get_ports {ntt_out2[5]}]
+set_property LOAD 1 [get_ports {ntt_out2[6]}]
+set_property LOAD 1 [get_ports {ntt_out2[7]}]
+set_property LOAD 1 [get_ports {ntt_out2[8]}]
+set_property LOAD 1 [get_ports {ntt_out2[9]}]
+set_property LOAD 1 [get_ports ntt_out_en]
+set_property LOAD 1 [get_ports {pwm_out1[0]}]
+set_property LOAD 1 [get_ports {pwm_out1[10]}]
+set_property LOAD 1 [get_ports {pwm_out1[11]}]
+set_property LOAD 1 [get_ports {pwm_out1[1]}]
+set_property LOAD 1 [get_ports {pwm_out1[2]}]
+set_property LOAD 1 [get_ports {pwm_out1[3]}]
+set_property LOAD 1 [get_ports {pwm_out1[4]}]
+set_property LOAD 1 [get_ports {pwm_out1[5]}]
+set_property LOAD 1 [get_ports {pwm_out1[6]}]
+set_property LOAD 1 [get_ports {pwm_out1[7]}]
+set_property LOAD 1 [get_ports {pwm_out1[8]}]
+set_property LOAD 1 [get_ports {pwm_out1[9]}]
+set_property LOAD 1 [get_ports {pwm_out2[0]}]
+set_property LOAD 1 [get_ports {pwm_out2[10]}]
+set_property LOAD 1 [get_ports {pwm_out2[11]}]
+set_property LOAD 1 [get_ports {pwm_out2[1]}]
+set_property LOAD 1 [get_ports {pwm_out2[2]}]
+set_property LOAD 1 [get_ports {pwm_out2[3]}]
+set_property LOAD 1 [get_ports {pwm_out2[4]}]
+set_property LOAD 1 [get_ports {pwm_out2[5]}]
+set_property LOAD 1 [get_ports {pwm_out2[6]}]
+set_property LOAD 1 [get_ports {pwm_out2[7]}]
+set_property LOAD 1 [get_ports {pwm_out2[8]}]
+set_property LOAD 1 [get_ports {pwm_out2[9]}]
+set_property LOAD 1 [get_ports pwm_out_en]
+set_drive        0.1   [all_inputs]
+
+#set_operating_conditions -max_library slow -max slow
+set_wire_load_model -name tsmc13_wl10 -library slow
+set_max_fanout 20 [all_inputs]
+
+
+
+
+
+
+
+
+

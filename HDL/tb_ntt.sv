@@ -10,13 +10,14 @@ You may need to edit this to read different data input!
 `include "mo_mul.svh"
 `include "fifo.svh"
 `define TB_PATH "/home/cicero/code/kyber/ref"
+//`define TB_PATH "."
 `define NTT
 
 `define CYCLE      10.0
 `define MAX_CYCLE 14000000
+`timescale 1ns/1ps
 
 `define DATA_SIZE (2<<`NTT_STAGE_CNT)
-
 
 module tb_ntt();
 
@@ -24,6 +25,9 @@ logic clk = '0,rst;
 always begin 
 	#(`CYCLE/2) clk = ~clk;
 end
+`ifdef SDF 
+	initial $sdf_annotate("syn/top_ntt_syn.sdf",u_top_ntt);
+`endif
 
 // maybe need to remove *2 if it's not kyber, check your algorithm
 logic [`DATA_WIDTH-1:0]data_in[`DATA_SIZE];
@@ -38,6 +42,7 @@ integer fd_in, fd_out;
 int fd_in2;
 initial begin
 	rst = '0;
+
 `ifdef NTT
 	fd_in = $fopen({`TB_PATH,"/ntt_in.dat"},"r");
 	fd_in2 = 1;
@@ -108,12 +113,12 @@ end
 
 
 top_ntt u_top_ntt(
-	.ntt_in_en(in_en), .ntt_in(in),
-	.ntt_out_en(out_en), .ntt_out(out),
-	.intt_in_en('0), .intt_in(in),
-	.intt_out_en(en_ignore[0]), .intt_out(data_ignore[0]),
-	.pwm_in_en('0), .pwm_in('{in,in2}),
-	.pwm_out_en(en_ignore[1]), .pwm_out(data_ignore[1]),
+	.ntt_in_en(in_en), .ntt_in1(in[0]), .ntt_in2(in[1]),
+	.ntt_out_en(out_en), .ntt_out1(out[0]), .ntt_out2(out[1]),
+	.intt_in_en('0), .intt_in1(in[0]), .intt_in2(in[1]),
+	.intt_out_en(en_ignore[0]), .intt_out1(data_ignore[0][0]), .intt_out2(data_ignore[0][1]),
+	.pwm_in_en('0), .pwm_in11(in[0]),.pwm_in12(in[1]),.pwm_in21(in2[0]),.pwm_in22(in2[1]),
+	.pwm_out_en(en_ignore[1]), .pwm_out1(data_ignore[1][0]),.pwm_out2(data_ignore[1][1]),
 .*);
 
 
@@ -153,13 +158,14 @@ always_comb begin
 	end
 end
 
+// FIXME
 top_ntt u_top_ntt(
-	.ntt_in_en('0), .ntt_in('0),
-	.ntt_out_en(en_ignore[0]), .ntt_out(data_ignore[0]),
-	.intt_in_en('0), .intt_in('0),
-	.intt_out_en(en_ignore[1]), .intt_out(data_ignore[1]),
-	.pwm_in_en(in_en), .pwm_in('{in,in2}),
-	.pwm_out_en(out_en), .pwm_out(out),
+	.ntt_in_en(in_en), .ntt_in1(in[0]), .ntt_in2(in[1]),
+	.ntt_out_en(out_en), .ntt_out1(out[0]), .ntt_out2(out[1]),
+	.intt_in_en('0), .intt_in1(in[0]), .intt_in2(in[1]),
+	.intt_out_en(en_ignore[0]), .intt_out1(data_ignore[0][0]), .intt_out2(data_ignore[0][1]),
+	.pwm_in_en('0), .pwm_in11(in[0]),.pwm_in12(in[1]),.pwm_in21(in2[0]),.pwm_in22(in2[1]),
+	.pwm_out_en(en_ignore[1]), .pwm_out1(data_ignore[1][0]),.pwm_out2(data_ignore[1][1]),
 .*);
 
 `elsif INTT
@@ -187,13 +193,14 @@ always_comb begin
 	end
 end
 
+// FIXME
 top_ntt u_top_ntt(
-	.ntt_in_en('0), .ntt_in(in),
-	.ntt_out_en(en_ignore[0]), .ntt_out(data_ignore[0]),
-	.intt_in_en(in_en), .intt_in(in),
-	.intt_out_en(out_en), .intt_out(out),
-	.pwm_in_en('0), .pwm_in('{in,in2}),
-	.pwm_out_en(en_ignore[1]), .pwm_out(data_ignore[1]),
+	.ntt_in_en(in_en), .ntt_in1(in[0]), .ntt_in2(in[1]),
+	.ntt_out_en(out_en), .ntt_out1(out[0]), .ntt_out2(out[1]),
+	.intt_in_en('0), .intt_in1(in[0]), .intt_in2(in[1]),
+	.intt_out_en(en_ignore[0]), .intt_out1(data_ignore[0][0]), .intt_out2(data_ignore[0][1]),
+	.pwm_in_en('0), .pwm_in11(in[0]),.pwm_in12(in[1]),.pwm_in21(in2[0]),.pwm_in22(in2[1]),
+	.pwm_out_en(en_ignore[1]), .pwm_out1(data_ignore[1][0]),.pwm_out2(data_ignore[1][1]),
 .*);
 
 `endif

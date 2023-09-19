@@ -9,12 +9,12 @@ example of usage this module
 
 module top_ntt(
 	input clk, input rst,
-	input ntt_in_en, input [`DATA_WIDTH-1:0] ntt_in[2],
-	output logic ntt_out_en, output logic [`DATA_WIDTH-1:0] ntt_out[2],
-	input intt_in_en, input [`DATA_WIDTH-1:0] intt_in[2],
-	output logic intt_out_en, output logic [`DATA_WIDTH-1:0] intt_out[2],
-	input pwm_in_en, input [`DATA_WIDTH-1:0] pwm_in[2][2],
-	output logic pwm_out_en, output logic [`DATA_WIDTH-1:0] pwm_out[2]
+	input ntt_in_en, input [`DATA_WIDTH-1:0] ntt_in1,input [`DATA_WIDTH-1:0] ntt_in2,
+	output logic ntt_out_en, output logic [`DATA_WIDTH-1:0] ntt_out1,output logic [`DATA_WIDTH-1:0] ntt_out2,
+	input intt_in_en, input [`DATA_WIDTH-1:0] intt_in1,input [`DATA_WIDTH-1:0] intt_in2,
+	output logic intt_out_en, output logic [`DATA_WIDTH-1:0] intt_out1,output logic [`DATA_WIDTH-1:0] intt_out2,
+	input pwm_in_en, input [`DATA_WIDTH-1:0] pwm_in11,input [`DATA_WIDTH-1:0] pwm_in12,input [`DATA_WIDTH-1:0] pwm_in21,input [`DATA_WIDTH-1:0] pwm_in22,
+	output logic pwm_out_en, output logic [`DATA_WIDTH-1:0] pwm_out1, output logic [`DATA_WIDTH-1:0] pwm_out2
 );
 
 // all the zeta
@@ -48,7 +48,19 @@ end
 // fifo_ctrl_io fifo_ctrl_if();
 fifo_cts u_fifo_cts(.*);
 
+logic [`DATA_WIDTH-1:0] ntt_in[2];
+logic [`DATA_WIDTH-1:0] ntt_out[2];
+logic [`DATA_WIDTH-1:0] intt_in[2];
+logic [`DATA_WIDTH-1:0] intt_out[2];
+logic [`DATA_WIDTH-1:0] pwm_in[2][2];
+logic [`DATA_WIDTH-1:0] pwm_out[2];
 
+assign ntt_in  = '{ntt_in1,ntt_in2};
+assign intt_in = '{intt_in1,intt_in2};
+assign pwm_in  = '{'{pwm_in11,pwm_in12}, '{pwm_in21,pwm_in22}};
+assign {ntt_out1,ntt_out2}   = {>>{ntt_out}};
+assign {intt_out1,intt_out2} = {>>{intt_out}};
+assign {pwm_out1,pwm_out2}   = {>>{pwm_out}};
 ntt u_ntt(
 	.in_en(ntt_in_en), .in(ntt_in),
 	.out_en(ntt_out_en), .out(ntt_out),

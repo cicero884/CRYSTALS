@@ -68,19 +68,15 @@ int main(int argc,char *argv[]){
 
 		if(!(i&(i-1))){
 			if(fd) {
-				fprintf(fd, ";\n");
 				fclose(fd);
 			}
-			sprintf(fname,"rom_%d.coe",rom_index);
+			sprintf(fname,"rom_%d.dat",rom_index);
 			fd = fopen(fname,"w");
-			fprintf(fd, "memory_initialization_radix=16;\n");
-			fprintf(fd, "memory_initialization_vector=\n");
 			rom_index++;
 		}
-		else fprintf(fd,",\n");
+		else fprintf(fd," ");
 		fprintf(fd,"%x",out_num);
 	}
-	fprintf(fd, ";\n");
 	fclose(fd);
 	return 0;
 }

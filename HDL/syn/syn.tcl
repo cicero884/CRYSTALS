@@ -22,8 +22,9 @@ set_structure -timing true
 
 check_design
 
+#-gate_clock
 # Synthesize (ultimate)
-compile_ultra -no_autoungroup -no_boundary_optimization -retime -gate_clock
+compile_ultra -no_autoungroup -no_boundary_optimization -retime 
 compile_ultra -incremental
 
 current_design [get_designs ${top}]
