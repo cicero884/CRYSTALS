@@ -15,7 +15,7 @@ You may need to edit this to read different data input!
 
 `define CYCLE     4.2
 `define MAX_CYCLE 14000000
-`timescale 1ns/1ps
+`timescale 1ns/100fs
 
 `define DATA_SIZE (2<<`NTT_STAGE_CNT)
 
@@ -77,7 +77,7 @@ end
 */
 int in_cnt, out_cnt;
 int data_cnt,err_cnt;
-logic [`DATA_WIDTH-1:0] in[2],in2[2],out[2],delay_out[2];
+logic [`DATA_WIDTH-1:0] in[2],in2[2],out[2];
 logic [$clog2(`DATA_SIZE)-1:0] out_addr[2];
 logic [`DATA_WIDTH-1:0] data_ignore[2][2];
 logic en_ignore[2];
@@ -219,7 +219,6 @@ always_ff @(negedge clk, posedge rst) begin
 		in_cnt <= `DATA_SIZE/2-1;
 	end
 	else begin
-		delay_out <= out;
 		// input cnt ctl
 		if(in_cnt == `DATA_SIZE/2-1) begin
 			if ($feof(fd_in)) in_en <= '0;
@@ -261,6 +260,13 @@ initial begin
 		data_out[i] <= unsign_mod(origin_data);
 	end
 end
+// cache it~!
+logic [`DATA_WIDTH-1:0] out_delay[2];
+logic out_en_delay;
+always_ff @(posedge clk) begin
+	out_delay <= out;
+	out_en_delay <= out_en;
+end
 always_ff @(posedge clk) begin
 	if(rst) begin
 		out_cnt <= 0;
@@ -268,7 +274,7 @@ always_ff @(posedge clk) begin
 		err_cnt <= 0;
 	end
 	else begin
-		if(out_en) begin
+		if(out_en_delay) begin
 			if(out_cnt == `DATA_SIZE/2-1) begin
 				out_cnt <= 0;
 				for(int i = 0; i < `DATA_SIZE; ++i) begin
@@ -281,11 +287,11 @@ always_ff @(posedge clk) begin
 			else out_cnt <= out_cnt+1;
 
 			for(int i = 0; i < 2; ++i) begin
-				if(data_out[out_addr[i]] == unsign_mod(delay_out[i])) begin
-					//$display("data correct!, %d == %d", data_out[out_addr[i]], delay_out[i]);
+				if(data_out[out_addr[i]] == unsign_mod(out_delay[i])) begin
+					//$display("data correct!, %d == %d", data_out[out_addr[i]], out_delay[i]);
 				end
 				else begin
-					$display("data %d error!,[%d] %d != %d", data_cnt, out_addr[i], data_out[out_addr[i]], delay_out[i]);
+					$display("data %d error!,%d:[%d] %d != %d", data_cnt,out_cnt, out_addr[i], data_out[out_addr[i]], out_delay[i]);
 					err_cnt <= err_cnt + 1;
 				end
 			end
