@@ -5,7 +5,7 @@ duel pipelined ntt
 module ntt(
 	input clk,input rst,
 	input in_en,input [`DATA_WIDTH-1:0]in[2],
-	output out_en,output logic [`DATA_WIDTH-1:0]out[2],
+	output logic out_en,output logic [`DATA_WIDTH-1:0]out[2],
 
 	output logic[`NTT_STAGE_CNT-2:0] rom_addr[`NTT_STAGE_CNT],
 	input [`DATA_WIDTH-1:0] rom_data[`NTT_STAGE_CNT],

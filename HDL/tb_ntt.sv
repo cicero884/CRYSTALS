@@ -13,7 +13,7 @@ You may need to edit this to read different data input!
 //`define TB_PATH "."
 `define NTT
 
-`define CYCLE      10.0
+`define CYCLE     5.0
 `define MAX_CYCLE 14000000
 `timescale 1ns/1ps
 
@@ -213,13 +213,10 @@ endfunction
 
 // FIXME: change this depend ont your data
 logic signed [15:0] origin_data;
-always_ff @(posedge clk, posedge rst) begin
+always_ff @(negedge clk, posedge rst) begin
 	if (rst) begin
 		in_en <= '0;
 		in_cnt <= `DATA_SIZE/2-1;
-		out_cnt <= `DATA_SIZE/2-1;
-		data_cnt <= 0;
-		err_cnt <= 0;
 	end
 	else begin
 		delay_out <= out;
@@ -254,7 +251,23 @@ always_ff @(posedge clk, posedge rst) begin
 			end                   
 		end
 		*/
-		// output cnt ctl 
+	end
+end
+
+// output cnt ctl
+initial begin
+	for(int i = 0; i < `DATA_SIZE; ++i) begin
+		if(!$fscanf(fd_out, "%h", origin_data)) $display("output Read err");
+		data_out[i] <= unsign_mod(origin_data);
+	end
+end
+always_ff @(posedge clk) begin
+	if(rst) begin
+		out_cnt <= 0;
+		data_cnt <= 0;
+		err_cnt <= 0;
+	end
+	else begin
 		if(out_en) begin
 			if(out_cnt == `DATA_SIZE/2-1) begin
 				out_cnt <= 0;

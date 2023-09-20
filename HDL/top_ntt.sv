@@ -54,15 +54,22 @@ logic [`DATA_WIDTH-1:0] intt_in[2];
 logic [`DATA_WIDTH-1:0] intt_out[2];
 logic [`DATA_WIDTH-1:0] pwm_in[2][2];
 logic [`DATA_WIDTH-1:0] pwm_out[2];
+logic ntt_in_en_delay,intt_in_en_delay,pwm_in_en_delay;
+// give in negetive clk, so cache at posedge clk
+always_ff @(posedge clk) begin
+	ntt_in_en_delay <= ntt_in_en;
+	intt_in_en_delay <= intt_in_en;
+	pwm_in_en_delay <= pwm_in_en;
+	ntt_in  <= '{ntt_in1,ntt_in2};
+	intt_in <= '{intt_in1,intt_in2};
+	pwm_in  <= '{'{pwm_in11,pwm_in12}, '{pwm_in21,pwm_in22}};
+end
 
-assign ntt_in  = '{ntt_in1,ntt_in2};
-assign intt_in = '{intt_in1,intt_in2};
-assign pwm_in  = '{'{pwm_in11,pwm_in12}, '{pwm_in21,pwm_in22}};
 assign {ntt_out1,ntt_out2}   = {>>{ntt_out}};
 assign {intt_out1,intt_out2} = {>>{intt_out}};
 assign {pwm_out1,pwm_out2}   = {>>{pwm_out}};
 ntt u_ntt(
-	.in_en(ntt_in_en), .in(ntt_in),
+	.in_en(ntt_in_en_delay), .in(ntt_in),
 	.out_en(ntt_out_en), .out(ntt_out),
 	.rom_addr(rom_addr[0]), .rom_data(rom_data[0]),
 	.fifo_en(ntt_en[0]),
