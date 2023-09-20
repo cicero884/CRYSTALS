@@ -13,7 +13,7 @@ You may need to edit this to read different data input!
 //`define TB_PATH "."
 `define NTT
 
-`define CYCLE     5.0
+`define CYCLE     4.2
 `define MAX_CYCLE 14000000
 `timescale 1ns/1ps
 
@@ -66,7 +66,7 @@ initial begin
 	end
 	else begin
 		#(`CYCLE*0.5) rst = '1; 
-		#(`CYCLE*10); #0.5; rst = '0;
+		#(`CYCLE*100); #0.5; rst = '0;
 	end
 	//$fsdbDumpfile("ntt.fsdb");
 	//$fsdbDumpvars();
