@@ -105,7 +105,7 @@ mo_mul si_mul(
 localparam HRS = 1<<(STAGE);
 // fifo2
 localparam fifo2_size = `MUL_STAGE_CNT-HRS-1;
-dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(fifo2_size)) fifo2(
+dp_ram #(.WIDTH(`DATA_WIDTH), .DEPTH(fifo2_size)) fifo2(
 	.addr($clog2(fifo2_size)'(fifo2_addr)),
 	.in(add_sub_out[0]), .out(fifo2_out), 
 .*);
@@ -125,13 +125,13 @@ end
 generate
 if(STAGE == 0) begin
 	logic tmp_addr;
-	dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(HRS)) fifo1(
+	dp_ram #(.WIDTH(`DATA_WIDTH), .DEPTH(HRS)) fifo1(
 		.addr(tmp_addr),
 		.in(switch_data[1]), .out(out[1]), 
 	.*);
 end
 else begin
-	dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(HRS)) fifo1(
+	dp_ram #(.WIDTH(`DATA_WIDTH), .DEPTH(HRS)) fifo1(
 		.addr(ctl_cnt[`INTT_SWITCH_CNT_BITS]),
 		.in(switch_data[1]), .out(out[1]), 
 	.*);
@@ -196,7 +196,7 @@ localparam HRS = 1<<(STAGE);
 // fifo2
 logic [`DATA_WIDTH-1:0] fifo1_out;
 localparam fifo2_size = HRS-`MUL_STAGE_CNT-1;
-dp_ram #(.WIDTH(`DATA_WIDTH*2), .SIZE(fifo2_size)) fifo2(
+dp_ram #(.WIDTH(`DATA_WIDTH*2), .DEPTH(fifo2_size)) fifo2(
 	.addr($clog2(fifo2_size)'(fifo2_addr)),
 	.in({mul_result,fifo1_out}), .out({fifo2_out, out[1]}), 
 .*);
@@ -208,7 +208,7 @@ always_ff @(posedge clk) begin
 	else {out[0],switch_data} <= {fifo2_out, add_sub_out[0]};
 end
 // fifo1
-dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(`MUL_STAGE_CNT-1)) fifo1(
+dp_ram #(.WIDTH(`DATA_WIDTH), .DEPTH(`MUL_STAGE_CNT-1)) fifo1(
 	.addr(fifo1_addr),
 	.in(switch_data), .out(fifo1_out), 
 .*);
@@ -242,7 +242,7 @@ add_sub #(.isNTT(0)) as_0(
 .*);
 
 // delay with mo_mul
-dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(`MUL_STAGE_CNT-1)) s0_fifo(
+dp_ram #(.WIDTH(`DATA_WIDTH), .DEPTH(`MUL_STAGE_CNT-1)) s0_fifo(
 	.addr(fifo1_addr),
 	.in(add_sub_out[0]), .out(out[0]), 
 .*);

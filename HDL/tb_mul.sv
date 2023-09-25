@@ -1,6 +1,8 @@
 /************
 testbench for check correct of mo_mul
 ************/
+`include "mo_mul.svh"
+`include "ntt_param.svh"
 
 `define CYCLE 10.0
 

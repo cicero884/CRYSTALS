@@ -69,7 +69,7 @@ module ntt_s0(
 	input [`MUL_STAGE_BITS-1:0] fifo1_addr
 );
 logic [`DATA_WIDTH-1:0] fifo1_out, mul_result;
-dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(`MUL_STAGE_CNT-1)) s0_fifo(
+dp_ram #(.WIDTH(`DATA_WIDTH), .DEPTH(`MUL_STAGE_CNT-1)) s0_fifo(
 	.addr(`MUL_STAGE_BITS'(fifo1_addr)),
 	.in(in[0]), .out(fifo1_out), 
 .*);
@@ -134,12 +134,12 @@ end
 // fifo2
 logic [`DATA_WIDTH-1:0] fifo2_out[2];
 localparam fifo2_size = `HRS-`MUL_STAGE_CNT-1;
-dp_ram #(.WIDTH(`DATA_WIDTH*2), .SIZE(fifo2_size)) fifo2(
+dp_ram #(.WIDTH(`DATA_WIDTH*2), .DEPTH(fifo2_size)) fifo2(
 	.addr($clog2(fifo2_size)'(fifo2_addr)),
 	.in({in[0], mul_result}), .out({fifo2_out[0], fifo2_out[1]}), 
 .*);
 // fifo1
-dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(`MUL_STAGE_CNT-1)) fifo1(
+dp_ram #(.WIDTH(`DATA_WIDTH), .DEPTH(`MUL_STAGE_CNT-1)) fifo1(
 	.addr(`MUL_STAGE_BITS'(fifo1_addr)),
 	.in(fifo2_out[0]), .out(fifo1_out), 
 .*);
@@ -194,7 +194,6 @@ always_ff @(posedge clk) begin
 end
 assign rom_addr = ctl_delay[`NTT_ROM_BITS];
 logic [`DATA_WIDTH-1:0] switch_data[2], fifo1_out, mul_result;
-//FIXME: cause not pass syn?
 always_ff @(posedge clk) begin
 	if(ctl_delay[SWITCH_INDEX]) switch_data <= '{fifo1_out, in1_delay};
 	else switch_data <= '{in1_delay, fifo1_out};
@@ -213,14 +212,9 @@ if (SWITCH_INDEX == 0) begin
 		fifo1_tmp <= in[0];
 		fifo1_out <= fifo1_tmp;
 	end
-//	logic tmp_addr;
-//	dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(`HRS)) fifo1(
-//		.addr($clog2(`HRS)'(tmp_addr)),
-//		.in(in[0]), .out(fifo1_out), 
-//	.*);
 end
 else begin
-	dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(`HRS)) fifo1(
+	dp_ram #(.WIDTH(`DATA_WIDTH), .DEPTH(`HRS)) fifo1(
 		.addr(ctl_cnt[`NTT_SWITCH_CNT_BITS]),
 		.in(in[0]), .out(fifo1_out), 
 	.*);
@@ -230,7 +224,7 @@ endgenerate
 // fifo2
 logic [`DATA_WIDTH-1:0] fifo2_out;
 localparam fifo2_size = `MUL_STAGE_CNT-`HRS-1;
-dp_ram #(.WIDTH(`DATA_WIDTH), .SIZE(fifo2_size)) fifo2(
+dp_ram #(.WIDTH(`DATA_WIDTH), .DEPTH(fifo2_size)) fifo2(
 	.addr($clog2(fifo2_size)'(fifo2_addr)),
 	.in(switch_data[0]), .out(fifo2_out), 
 .*);

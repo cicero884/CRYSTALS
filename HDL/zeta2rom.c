@@ -22,12 +22,12 @@ long long unsigned MSB_2(long long unsigned msb_q){
 int main(int argc,char *argv[]){
 	if(argc < 3){
 		printf("input : argv1=log2(poly size), argv2=Q, [argv3=root of unity]\n");
-		printf("for kyber is 17 8 3329\n");
+		printf("for kyber is 8 3329 17\n");
 		printf("ex: %s 8 3329 17\n",argv[0]);
 		printf("or: %s 8 3329\n",argv[0]);
 		return 1;
 	}
-	bit_size = atoi(argv[1])-1;
+	bit_size = atoi(argv[1]);
 	Q = atoi(argv[2]);
 	long long unsigned zeta;
 	if(argc == 3){

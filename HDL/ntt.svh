@@ -1,14 +1,6 @@
 `ifndef NTT_SVH
 `define NTT_SVH
 
-// FIXME: edit it in syn
-`define Q 3329
-`define NTT_STAGE_CNT 7
-
-
-
-//`define Q 343576577
-//`define Q 3329
 // Q = Q_K*(2^Q_M)+1
 // kyber: 3329 = 13*(2^8)+1
 `define Q_M ($clog2((`Q-2)^`Q)-1)

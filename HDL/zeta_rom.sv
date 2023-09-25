@@ -1,6 +1,7 @@
 /************
 zeta_rom
 *************/
+`include "rom.svh"
 
 module duel_rom #(parameter STAGE)(
 	input clk,
@@ -20,7 +21,7 @@ initial begin
 	// if you are not using vivodo, you should use memory generator
 	localparam bit [7:0] asscii_index = "0" + STAGE;
 	//localparam path = get_path_from_file(`__FILE__);
-	localparam fname = {"/home/cicero/code/CRYSTALS/HDL/rom_",asscii_index,".dat"};
+	localparam fname = {`ROM_PATH,"/rom_",asscii_index,".dat"};
 	if(STAGE > 9) begin
 		$display("ERROR! the STAGE is over one digit, consider fix it in zeta_rom");
 		$finish;
@@ -42,14 +43,21 @@ module zeta_rom(
 	output logic [`DATA_WIDTH-1:0]rom_data[2][`NTT_STAGE_CNT]
 );
 
+
 // rom_0 (only one number inside)
-logic [`DATA_WIDTH-1:0] rom_0[0:0];
+logic [`DATA_WIDTH-1:0] rom_0[0:1];
 initial begin
-	//localparam path = get_path_from_file(`__FILE__);
-	$readmemh("/home/cicero/code/CRYSTALS/HDL/rom_0.dat", rom_0);
+	localparam fname = {`ROM_PATH,"/rom_0.dat"};
+	$readmemh({`ROM_PATH,"/rom_0.dat"}, rom_0);
 end
-assign rom_data[0][0] = 12'h4b1;//rom_0[0];
-assign rom_data[1][0] = 12'h4b1;//rom_0[0];
+
+always_ff @(posedge clk) begin
+    rom_data[0][0] <= rom_0[0];
+    rom_data[1][0] <= rom_0[0];
+end
+//assign rom_data[0][0] = rom_0[0];
+//assign rom_data[1][0] = rom_0[0];
+
 
 genvar i;
 generate

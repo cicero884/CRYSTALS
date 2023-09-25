@@ -13,7 +13,7 @@ You may need to edit this to read different data input!
 //`define TB_PATH "."
 `define NTT
 
-`define CYCLE     4.2
+`define CYCLE     4.198
 `define MAX_CYCLE 14000000
 `timescale 1ns/100fs
 
@@ -211,7 +211,7 @@ function logic [`DATA_WIDTH-1:0] unsign_mod(logic signed [15:0] in);
 	return in;
 endfunction
 
-// FIXME: change this depend ont your data
+// FIXME: change this depend on your data
 logic signed [15:0] origin_data;
 always_ff @(negedge clk, posedge rst) begin
 	if (rst) begin
@@ -262,19 +262,32 @@ initial begin
 end
 // cache it~!
 logic [`DATA_WIDTH-1:0] out_delay[2];
-logic out_en_delay;
+logic out_en_delay[2];
+int latency;
+logic latency_cnt_en;
+always_latch begin
+	case(1'b1)
+		out_en: latency_cnt_en <= '0;
+		in_en: latency_cnt_en <= '1;
+	endcase
+end
 always_ff @(posedge clk) begin
 	out_delay <= out;
-	out_en_delay <= out_en;
+	out_en_delay[0] <= out_en;
+	out_en_delay[1] <= out_en_delay[0];
 end
 always_ff @(posedge clk) begin
 	if(rst) begin
 		out_cnt <= 0;
 		data_cnt <= 0;
 		err_cnt <= 0;
+		latency <= 0;
 	end
 	else begin
-		if(out_en_delay) begin
+		if(latency_cnt_en) latency <= latency+1;
+		if(out_en_delay[0]!==out_en_delay[1]) $display("latency is : %d cycles",latency);
+
+		if(out_en_delay[0]) begin
 			if(out_cnt == `DATA_SIZE/2-1) begin
 				out_cnt <= 0;
 				for(int i = 0; i < `DATA_SIZE; ++i) begin

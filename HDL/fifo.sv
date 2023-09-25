@@ -15,7 +15,7 @@ TODO: clock gating with fifo_en.
 /*
 // designware
 if (WIDTH < 256) begin 
-	DW_fifo_s1_sf #(WIDTH,  SIZE,  1,  1,  0,  3)
+	DW_fifo_s1_sf #(WIDTH,  DEPTH,  1,  1,  0,  3)
 	U1 (.clk(inst_clk),   .rst_n(!rst),   .push_req_n(inst_push_req_n),
 		.pop_req_n(inst_pop_req_n),   .diag_n(inst_diag_n),
 		.data_in(inst_data_in),   .empty(empty_inst),
@@ -76,14 +76,14 @@ endmodule: fifo_counter
 // duel port ram, read write at same addr
 // write after read
 // used on fifo will delay one more clock for output flipflop
-module dp_ram #(parameter WIDTH, parameter SIZE)(
+module dp_ram #(parameter WIDTH, parameter DEPTH)(
 	input clk,
-	input [$clog2(SIZE)-1:0] addr,
+	input [$clog2(DEPTH)-1:0] addr,
 	input [WIDTH-1:0] in,
 	output logic[WIDTH-1:0] out
 );
 generate
-case(SIZE)
+case(DEPTH)
 	-1: assign out = in;
 	0 : always_ff @(posedge clk) out <= in;
 	1 : begin
@@ -94,7 +94,7 @@ case(SIZE)
 		end
 	end
 	default: begin
-		logic [WIDTH-1:0] ram[SIZE];
+		logic [WIDTH-1:0] ram[DEPTH];
 		always_ff @(posedge clk) begin
 			ram[addr] <= in;
 			out <= ram[addr];

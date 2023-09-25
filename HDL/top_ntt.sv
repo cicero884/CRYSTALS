@@ -2,6 +2,7 @@
 top_ntt
 example of usage this module
 **********/
+`include "ntt_param.svh"
 `include "ntt.svh"
 `include "add_sub.svh"
 `include "mo_mul.svh"
@@ -29,11 +30,14 @@ localparam intt_cnt = 1;
 logic ntt_en [ntt_cnt][`NTT_STAGE_CNT], intt_en[ntt_cnt][`NTT_STAGE_CNT], fifo_en[`NTT_STAGE_CNT];
 logic [`MAX_FIFO2_ADDR_BITS-1:0] fifo2_ntt_addr[`NTT_STAGE_CNT], fifo2_intt_addr[`NTT_STAGE_CNT], fifo2_addr[`NTT_STAGE_CNT];
 logic [`MUL_STAGE_BITS-1:0] fifom_addr;
-// FIXME: require casting to int for correct streaming operator
-// I guess it's vcs bug
-//ex: the behavier is different under there
-//assign fifo2_ntt_addr = {<<$clog2(32){fifo2_addr}};
-//assign fifo2_ntt_addr = {<<5{fifo2_addr}};
+/*
+FIXME: require casting to int for correct streaming operator
+
+I guess it's vcs bug
+ex: the behavier is different under there
+assign fifo2_ntt_addr = {<<$clog2(32){fifo2_addr}};
+assign fifo2_ntt_addr = {<<5{fifo2_addr}};
+*/
 assign fifo2_ntt_addr = {<<(int'(`MAX_FIFO2_ADDR_BITS)){fifo2_addr}};
 assign fifo2_intt_addr = fifo2_addr;
 always_comb begin

@@ -1,10 +1,34 @@
 # author:509
+# basic parameters
+
+
+ROM_PATH		= /home/cicero/code/CRYSTALS/HDL/
+# kyber
+#Q = 3329
+#NTT_STAGE_CNT = 7
+
+# dilithium
+Q = 8380417
+NTT_STAGE_CNT = 8
+
+# new-hope kyber
+#Q = 12289
+#NTT_STAGE_CNT = 9
+
+# qTESLA
+#Q = 343576577
+#NTT_STAGE_CNT = 9
+
+# require full path for vivodo
+
+
+##############
 
 # files you dont need to synthesize
 TB_TOP_FILE		=	tb_ntt.sv
 TB_MUL_TOP_FILE	=	tb_mul.sv
 # files you want synthesize
-TOP_FILE	=	top_ntt.sv add_sub.sv fifo.sv mo_mul.sv ntt.sv zeta_rom.sv intt.sv 
+TOP_FILE		=	top_ntt.sv add_sub.sv fifo.sv mo_mul.sv ntt.sv zeta_rom.sv intt.sv 
 MUL_TOP_FILE	=	mo_mul.sv
 # top module
 TOP			=	top_ntt
@@ -12,19 +36,20 @@ SDC			=	syn/$(TOP).sdc
 
 PASS_STR	=	"ALL PASS"
 
-Q				=	3329
-N				=	8
 
 .PHONY: all gtech syn gate nw clean
 default:
-	@echo "mul_test  => Run test for mo_mul.sv"
-	@echo "rom_data  => Generate rom data"
-	@echo "gtech_ntt => Run gtech level simulation of ntt"
+	@echo "mul_test   => Run test for mo_mul.sv"
+	@echo "gtech_ntt  => Run gtech level simulation of ntt"
 	@echo "gtech_intt => Run gtech level simulation of intt"
-	@echo "nw        => Run nWave"
-	@echo "syn       => Run synthesize in interactive mode"
-	@echo "gate      => Run gate-level simulation"
-	@echo "clean     => Clear file after synthesize"
+	@echo "nw         => Run nWave"
+	@echo "syn        => Run synthesize in interactive mode"
+	@echo "gate_ntt   => Run ntt gate-level simulation"
+	@echo "clean      => Clear file after synthesize"
+	@echo "-----------------"
+	@echo "gen_files  => Generate all require file by parameter in Makefile"
+	@echo "rom_data   => Generate rom data and rom.svh"
+	@echo "parameter  => Generate parameter.svh"
 
 all: gtech_ntt syn gate
 
@@ -33,8 +58,24 @@ all: gtech_ntt syn gate
 		#-debug_pp +v2k +memcbk \
 
 rom_data: zeta2rom.c
+	rm ./*.dat -f
+	rm rom_0.svh -f
 	gcc zeta2rom.c -o zeta2rom -std=c99
-	./zeta2rom $(N) $(Q)
+	./zeta2rom $(NTT_STAGE_CNT) $(Q)
+	@echo " \
+		\`define ROM0_DATA $(shell cat rom_0.dat)\n\
+		\`define ROM_PATH \"$(shell pwd)\" " \
+		> rom.svh
+
+parameter: 
+# parameters for ntt
+	@echo " \
+		\`define Q $(Q)\n\
+		\`define NTT_STAGE_CNT $(NTT_STAGE_CNT) " \
+		> ntt_param.svh
+
+gen_files: rom_data parameter
+	@echo "all file generated!"
 
 mul_test:
 	vcs -R $(TB_MUL_TOP_FILE) $(MUL_TOP_FILE) \
@@ -43,10 +84,9 @@ mul_test:
 		+fsdbfile+mul.fsdb \
 		+access+R \
 		-sverilog \
-		-l mo_mul.log \
-		+define+Q=$(Q)
+		-l mo_mul.log
 
-gtech_ntt: rom_data
+gtech_ntt: rom_data parameter
 	vcs -R $(TB_TOP_FILE) $(TOP_FILE) \
 		-sverilog \
 		-l ntt.log \
@@ -54,12 +94,9 @@ gtech_ntt: rom_data
 		+fsdb+mda \
 		+access+R \
 		+fsdbfile+ntt.fsdb \
-		+define+NTT \
-		+define+Q=$(Q) \
-		+define+NTT_STAGE_CNT=$(N)-1
-# FIXME: NTT_STAGE_CNT = N-1?
+		+define+NTT
 
-gtech_intt: rom_data
+gtech_intt: rom_data parameter
 	vcs -R $(TB_TOP_FILE) $(TOP_FILE) \
 		+vcs+fsdbon \
 		+fsdb+mda \
@@ -67,21 +104,22 @@ gtech_intt: rom_data
 		+fsdbfile+intt.fsdb \
 		-sverilog \
 		-l intt.log \
-		+define+INTT \
-		+define+Q=$(Q) \
-		+define+NTT_STAGE_CNT=$(N)-1
+		+define+INTT
 
 # please use Ctrl+Z , bg , fg instead add & behind command
 nw:
 	nWave -f *.fsdb -sswr signal.rc +access+r
 
-syn syn/$(TOP)_syn.v: rom_data
+syn syn/$(TOP)_syn.v: rom_data parameter
+
 ifneq ($(wildcard ./syn),)
 	dc_shell -f syn/syn.tcl -output_log_file syn.log -x \
-		"	set top $(TOP); \
-			set src_file {$(TOP_FILE)}; \
-			set sdc_file $(SDC); \
+		"\
+		set top $(TOP); \
+		set src_file {$(TOP_FILE)}; \
+		set sdc_file $(SDC); \
 		";
+
 else
 	@echo "syn folder with syn.tcl & tsmc13_neg.v inside require!"
 endif
@@ -101,19 +139,20 @@ gate_ntt: syn
 		-debug_region+cell +memcbk \
 		+define+SDF \
 		-l gate_ntt.log \
-		+define+NTT \
-		+define+Q=$(Q) \
-		+define+NTT_STAGE_CNT=$(N)-1
+		+define+NTT
 	#-v sim_model.v
-#	irun $(TB_TOP_FILE) syn/$(TOP)_syn.v -v syn/tsmc13_neg.v \
-#		+access+r \
-#		+define+FSDB_FILE=\"$(TOP).fsdb\" \
-#		+define+SDF \
-#		+define+SDFFILE=\"syn/$(TOP)_syn.sdf\" \
-#		-append_log
-#	mv irun.log gate.log
-#	vcd2saif -i *.vcd -o ntt.saif
+	#	irun $(TB_TOP_FILE) syn/$(TOP)_syn.v -v syn/tsmc13_neg.v \
+		#		+access+r \
+		#		+define+FSDB_FILE=\"$(TOP).fsdb\" \
+		#		+define+SDF \
+		#		+define+SDFFILE=\"syn/$(TOP)_syn.sdf\" \
+		#		-append_log
+	#	mv irun.log gate.log
+	#	vcd2saif -i *.vcd -o ntt.saif
 
 clean:
+# simulation files
 	rm ./*.err ./*.log syn/$(TOP)_syn* *.fsdb irun.history -f
+# generated files
+	rm *.dat ntt_param.svh rom.svh zeta2rom -f
 
