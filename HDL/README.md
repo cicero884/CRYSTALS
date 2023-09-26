@@ -16,11 +16,11 @@ tb_mul
 tb_ntt
 └────top_ntt
      ├────fifo_cts
-	 │    └────fifo_counter
-	 ├────zeta_rom
-	 │    └────duel_rom
-	 ├────ntt
-	 │    ├────ntt_s0
+     │    └────fifo_counter
+     ├────zeta_rom
+     │    └────duel_rom
+     ├────ntt
+     │    ├────ntt_s0
      │    │    ├mo_mul
      │    │    ├dp_ram
      │    │    └add_sub
@@ -32,8 +32,8 @@ tb_ntt
      │         ├mo_mul
      │         ├dp_ram
      │         └add_sub
-	 ├────intt
-	 │    ├────intt_ss
+     ├────intt
+     │    ├────intt_ss
      │    │    ├mo_mul
      │    │    ├dp_ram
      │    │    └add_sub
