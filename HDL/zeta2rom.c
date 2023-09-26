@@ -2,7 +2,7 @@
  * zetas2rom
  * convert zetas to required data files for rom to read
  * input : argv1=root_of_unit, argv2=log2(poly size), argv3=prine
- * (for kyber is 17,8,3329)
+ * (for kyber is 8,3329,17)
  * (https://www.ietf.org/archive/id/draft-cfrg-schwabe-kyber-01.html)
  * output : multiple files for rom to read
  * *************/

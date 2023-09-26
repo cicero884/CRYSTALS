@@ -4,12 +4,12 @@
 
 ROM_PATH		= /home/cicero/code/CRYSTALS/HDL/
 # kyber
-#Q = 3329
-#NTT_STAGE_CNT = 7
+Q = 3329
+NTT_STAGE_CNT = 7
 
 # dilithium
-Q = 8380417
-NTT_STAGE_CNT = 8
+#Q = 8380417
+#NTT_STAGE_CNT = 8
 
 # new-hope kyber
 #Q = 12289
