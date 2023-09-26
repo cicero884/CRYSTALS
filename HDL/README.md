@@ -116,9 +116,9 @@ duel port rom store zeta values.
 ### zeta2rom.c
 convert zetas to required data files for rom to read  
 input : argv1=log2(poly size), argv2=prine, argv3=root_of_unit(optional)  
-ex1: `zeta2rom 8 3329`  
-ex2: `zeta2rom 8 3329 17`  
-(for kyber is 8,3329,17)   
+ex1: `zeta2rom 7 3329`  
+ex2: `zeta2rom 7 3329 17`  
+(for kyber is 7,3329,17 since the odd and even is separate)   
 (https://www.ietf.org/archive/id/draft-cfrg-schwabe-kyber-01.html)  
 output : multiple .dat files for rom to read  
 
