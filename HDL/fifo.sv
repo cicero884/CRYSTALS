@@ -31,8 +31,8 @@ module fifo_cts (
 	input clk, input rst,
 	//fifo_ctrl_io fifo_ctrl_if
 	input fifo_en[`NTT_STAGE_CNT],
-	output [`MAX_FIFO2_ADDR_BITS-1:0] fifo2_addr[`NTT_STAGE_CNT],
-	output [`MUL_STAGE_BITS-1:0] fifom_addr
+	output [`MAX_FIFO_ADDR_BITS-1:0] fifo2_addr[`NTT_STAGE_CNT],
+	output [`MAX_FIFO_ADDR_BITS-1:0] fifom_addr
 );
 // mul_stage fifo
 localparam int sizem = `MUL_STAGE_CNT-1;
@@ -78,7 +78,7 @@ endmodule: fifo_counter
 // used on fifo will delay one more clock for output flipflop
 module dp_ram #(parameter WIDTH, parameter DEPTH)(
 	input clk,
-	input [$clog2(DEPTH)-1:0] addr,
+	input [`MAX_FIFO_ADDR_BITS-1:0] addr,
 	input [WIDTH-1:0] in,
 	output logic[WIDTH-1:0] out
 );
@@ -94,10 +94,12 @@ case(DEPTH)
 		end
 	end
 	default: begin
+		logic [$clog2(DEPTH)-1:0] in_range_addr;
+		assign in_range_addr = addr[$clog2(DEPTH)-1:0];
 		logic [WIDTH-1:0] ram[DEPTH];
 		always_ff @(posedge clk) begin
-			ram[addr] <= in;
-			out <= ram[addr];
+			ram[in_range_addr] <= in;
+			out <= ram[in_range_addr];
 		end
 	end
 endcase

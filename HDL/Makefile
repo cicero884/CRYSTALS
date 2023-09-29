@@ -63,7 +63,7 @@ rom_data: zeta2rom.c
 	gcc zeta2rom.c -o zeta2rom -std=c99
 	./zeta2rom $(NTT_STAGE_CNT) $(Q)
 	@echo " \
-		\`define ROM0_DATA $(shell cat rom_0.dat)\n\
+		\`define ROM0_DATA 'h$(shell cat rom_0.dat)\n\
 		\`define ROM_PATH \"$(shell pwd)\" " \
 		> rom.svh
 

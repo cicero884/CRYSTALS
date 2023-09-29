@@ -10,8 +10,8 @@ module ntt(
 	output logic[`NTT_STAGE_CNT-2:0] rom_addr[`NTT_STAGE_CNT],
 	input [`DATA_WIDTH-1:0] rom_data[`NTT_STAGE_CNT],
 	output fifo_en[`NTT_STAGE_CNT],
-	input [`MUL_STAGE_BITS-1:0] fifom_addr,
-	input [`MAX_FIFO2_ADDR_BITS-1:0] fifo2_addr[`NTT_STAGE_CNT]
+	input [`MAX_FIFO_ADDR_BITS-1:0] fifom_addr,
+	input [`MAX_FIFO_ADDR_BITS-1:0] fifo2_addr[`NTT_STAGE_CNT]
 );
 logic [`DATA_WIDTH-1:0] data[`NTT_STAGE_CNT+1][2];
 logic en[`NTT_STAGE_CNT+1], gclk[`NTT_STAGE_CNT];
@@ -66,11 +66,11 @@ module ntt_s0(
 	input in_en,input [`DATA_WIDTH-1:0] in[2],
 	output logic [`NTT_STAGE_CNT-2:0] rom_addr,input [`DATA_WIDTH-1:0] rom_data,
 	output logic out_en,output [`DATA_WIDTH-1:0] out[2],
-	input [`MUL_STAGE_BITS-1:0] fifo1_addr
+	input [`MAX_FIFO_ADDR_BITS-1:0] fifo1_addr
 );
 logic [`DATA_WIDTH-1:0] fifo1_out, mul_result;
 dp_ram #(.WIDTH(`DATA_WIDTH), .DEPTH(`MUL_STAGE_CNT-1)) s0_fifo(
-	.addr(`MUL_STAGE_BITS'(fifo1_addr)),
+	.addr(fifo1_addr),
 	.in(in[0]), .out(fifo1_out), 
 .*);
 
@@ -117,7 +117,7 @@ module ntt_sl #(parameter SWITCH_INDEX)(
 	input in_en,input [`DATA_WIDTH-1:0] in[2],
 	output logic out_en,output [`DATA_WIDTH-1:0] out[2],
 	output logic [`NTT_STAGE_CNT-2:0] rom_addr,input [`DATA_WIDTH-1:0] rom_data,
-	input [`MUL_STAGE_BITS-1:0] fifo1_addr, input [`MAX_FIFO2_ADDR_BITS-1:0] fifo2_addr
+	input [`MAX_FIFO_ADDR_BITS-1:0] fifo1_addr, input [`MAX_FIFO_ADDR_BITS-1:0] fifo2_addr
 );
 logic [`NTT_STAGE_CNT-2:0] ctl_cnt;
 // counter for control switch & rom
@@ -135,12 +135,12 @@ end
 logic [`DATA_WIDTH-1:0] fifo2_out[2];
 localparam fifo2_size = `HRS-`MUL_STAGE_CNT-1;
 dp_ram #(.WIDTH(`DATA_WIDTH*2), .DEPTH(fifo2_size)) fifo2(
-	.addr($clog2(fifo2_size)'(fifo2_addr)),
+	.addr(fifo2_addr),
 	.in({in[0], mul_result}), .out({fifo2_out[0], fifo2_out[1]}), 
 .*);
 // fifo1
 dp_ram #(.WIDTH(`DATA_WIDTH), .DEPTH(`MUL_STAGE_CNT-1)) fifo1(
-	.addr(`MUL_STAGE_BITS'(fifo1_addr)),
+	.addr(fifo1_addr),
 	.in(fifo2_out[0]), .out(fifo1_out), 
 .*);
 // mul with zeta
@@ -178,7 +178,7 @@ module ntt_ss #(parameter SWITCH_INDEX)(
 	input in_en,input [`DATA_WIDTH-1:0] in[2],
 	output logic out_en,output [`DATA_WIDTH-1:0] out[2],
 	output logic [`NTT_STAGE_CNT-2:0] rom_addr,input [`DATA_WIDTH-1:0] rom_data,
-	input [`MAX_FIFO2_ADDR_BITS-1:0] fifo2_addr
+	input [`MAX_FIFO_ADDR_BITS-1:0] fifo2_addr
 );
 logic [`NTT_STAGE_CNT-2:0] ctl_cnt, ctl_delay;
 logic [`DATA_WIDTH-1:0] in1_delay;
@@ -225,7 +225,7 @@ endgenerate
 logic [`DATA_WIDTH-1:0] fifo2_out;
 localparam fifo2_size = `MUL_STAGE_CNT-`HRS-1;
 dp_ram #(.WIDTH(`DATA_WIDTH), .DEPTH(fifo2_size)) fifo2(
-	.addr($clog2(fifo2_size)'(fifo2_addr)),
+	.addr(fifo2_addr),
 	.in(switch_data[0]), .out(fifo2_out), 
 .*);
 // add_sub

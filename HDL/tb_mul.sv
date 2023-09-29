@@ -13,7 +13,7 @@ always begin
 	#(`CYCLE/2) clk = ~clk;
 end
 initial begin
-	$fsdbDumpfile("mul.fsdb");
+	//$fsdbDumpfile("mul.fsdb");
 	//$fsdbDumpvars(0, mo_mul, "+mda");
 	//$vcdplusmemon();
 	//$fsdbDumpfile("mul.fsdb");
@@ -24,12 +24,12 @@ initial begin
 end
 
 //logic signed [`DATA_WIDTH-1:0] in2='0;
-logic [`DATA_WIDTH-1:0] in1='0,in2='0;
-logic signed [`DATA_WIDTH:0] out,min='0,max='0;
+logic [`DATA_WIDTH-1:0] in1=1,in2=1;
+logic [`DATA_WIDTH-1:0] out,min=`Q,max='0;
 logic [`DATA_WIDTH-1:0] in1_delay[`MUL_STAGE_CNT+1],in2_delay[`MUL_STAGE_CNT+1];
 int gold,real_out;
 assign gold = (in1_delay[`MUL_STAGE_CNT]*in2_delay[`MUL_STAGE_CNT])%`Q;
-assign real_out = (1<<`DATA_WIDTH)*out%`Q;
+assign real_out = ((1<<`DATA_WIDTH)*out)%`Q;
 logic finish='0,out_en='0;
 logic countdown;
 assign in1_delay[0] = in1;
@@ -56,9 +56,9 @@ always_ff @(posedge clk) begin
 	end
 
 	// record min max
-	if(out < min) min <= out;
-	if(out > max) max <= out;
 	if(!in1[3:0] && !in2) $display("current min = %d, max = %d",min,max);
+	if(real_out<min) min <= real_out;
+	if(real_out>max) max <= real_out;
 
 	if($unsigned(in2)>`MUL_STAGE_CNT) out_en<=1;
 	if(out_en) begin

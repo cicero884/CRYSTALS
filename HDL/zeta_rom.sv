@@ -10,7 +10,6 @@ module duel_rom #(parameter STAGE)(
 );
 logic [`DATA_WIDTH-1:0] rom[(1<<STAGE)];
 
-
 //string fname;
 
 initial begin
@@ -45,18 +44,14 @@ module zeta_rom(
 
 
 // rom_0 (only one number inside)
-logic [`DATA_WIDTH-1:0] rom_0[0:1];
-initial begin
-	localparam fname = {`ROM_PATH,"/rom_0.dat"};
-	$readmemh({`ROM_PATH,"/rom_0.dat"}, rom_0);
-end
-
+/*
 always_ff @(posedge clk) begin
-    rom_data[0][0] <= rom_0[0];
-    rom_data[1][0] <= rom_0[0];
+    rom_data[0][0] <= `ROM0_DATA;
+    rom_data[1][0] <= `ROM0_DATA;
 end
-//assign rom_data[0][0] = rom_0[0];
-//assign rom_data[1][0] = rom_0[0];
+*/
+assign rom_data[0][0] = `ROM0_DATA;
+assign rom_data[1][0] = `ROM0_DATA;
 
 
 genvar i;

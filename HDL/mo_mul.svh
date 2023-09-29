@@ -4,5 +4,5 @@ change depend on your design of mo_mul
 ********/
 `ifndef MO_MUL_SVH
 `define MO_MUL_SVH
-`define MUL_STAGE_CNT (`DATA_WIDTH+1)
+`define MUL_STAGE_CNT (`DATA_WIDTH+2)
 `endif
