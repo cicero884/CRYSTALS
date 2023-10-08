@@ -122,3 +122,5 @@ ex2: `zeta2rom 7 3329 17`
 (https://www.ietf.org/archive/id/draft-cfrg-schwabe-kyber-01.html)  
 output : multiple .dat files for rom to read  
 
+### rom.svh,ntt_param.svh,*.data
+generated files, use make gen_files to generate.

@@ -6,10 +6,10 @@
  * (https://www.ietf.org/archive/id/draft-cfrg-schwabe-kyber-01.html)
  * output : multiple files for rom to read
  * *************/
-//TODO: extend bits
+//TODO: extend bits?
 #include<stdio.h>
 #include<stdlib.h>
-
+#include<string.h>
 unsigned bit_size;
 long long unsigned Q;
 // return MSB*2
@@ -19,27 +19,37 @@ long long unsigned MSB_2(long long unsigned msb_q){
 	}
 	return msb_q+1;
 }
+long long unsigned inverse(long long unsigned a){
+	long long unsigned i;
+	for(i=1; i<Q; i++){
+		if(((i*a)%Q)==1) return i;
+	}
+	if(i==Q) printf("inverse not found!\n");
+	return 0;
+}
 int main(int argc,char *argv[]){
 	if(argc < 3){
-		printf("input : argv1=log2(poly size), argv2=Q, [argv3=root of unity]\n");
-		printf("for kyber is 7 3329 17\n");
-		printf("ex: %s 7 3329 17\n",argv[0]);
+		printf("input : argv1=log2(poly size), argv2=Q, [argv3=mul_type], [argv4=root of unity]\n");
+		printf("for kyber is 7 3329 [mul type] 17\n");
+		printf("ex: %s 7 3329 MULTYPE_MWR2MM_N 17\n",argv[0]);
 		printf("or: %s 7 3329\n",argv[0]);
 		return 1;
 	}
 	bit_size = atoi(argv[1]);
 	Q = atoi(argv[2]);
 	long long unsigned zeta;
-	if(argc == 3){
-		for(long long unsigned i=2; i<Q; i++){
+	if(argc == 4){
+		long long unsigned i;
+		for(i=2; i<Q; i++){
 			long long unsigned tmp = i;
 			zeta = i;
 			for(int j=0; j<bit_size; j++) tmp=(tmp*tmp)%Q;
 			if(tmp == Q-1) break;
 		}
-		printf("zeta: %llu\n", zeta);
+		if(i == Q) printf("root of unity not found!\n");
+		else printf("zeta: %llu\n", zeta);
 	}
-	else zeta = atoi(argv[1]);
+	else zeta = atoi(argv[4]);
 
 	unsigned zeta_2[bit_size];
 	zeta_2[0] = zeta;
@@ -64,7 +74,15 @@ int main(int argc,char *argv[]){
 		// pre-multiply with numbers for later mo_mul
 		// for k-red require k^(-l)
 		// for MWR2MM require 2^n(FIXME)
-		out_num = (out_num * MSB_2(Q)) % Q;
+		if(argc>4 && (!strcmp(argv[3],"MULTYPE_KRED"))){
+			//TODO:change 169 to be able to calculate
+			if(Q!=3329 && bit_size!=7){
+				printf("error: fix 169 to your k**l");
+				return 1;
+			}
+			out_num = (out_num * inverse(169)) % Q;
+		}
+		else out_num = (out_num * MSB_2(Q)) % Q;
 
 		if(!(i&(i-1))){
 			if(fd) {

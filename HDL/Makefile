@@ -1,8 +1,9 @@
 # author:509
 # basic parameters
 
-
+# require full path for vivodo
 ROM_PATH		= /home/cicero/code/CRYSTALS/HDL/
+
 # kyber
 Q = 3329
 NTT_STAGE_CNT = 7
@@ -19,7 +20,10 @@ NTT_STAGE_CNT = 7
 #Q = 343576577
 #NTT_STAGE_CNT = 9
 
-# require full path for vivodo
+#define to use which mo_mul
+#available: "MULTYPE_MWR2MM_O", "MULTYPE_KRED", "MULTYPE_MWR2MM_N"
+#default is "MULTYPE_MWR2MM_N"
+MO_MUL_TYPE = MULTYPE_KRED
 
 
 ##############
@@ -59,10 +63,10 @@ all: gtech_ntt syn gate
 
 rom_data: zeta2rom.c
 	rm ./*.dat -f
-	rm rom_0.svh -f
+	rm rom.svh -f
 	gcc zeta2rom.c -o zeta2rom -std=c99
-	./zeta2rom $(NTT_STAGE_CNT) $(Q)
-	@echo " \
+	@./zeta2rom $(NTT_STAGE_CNT) $(Q) $(MO_MUL_TYPE) & \
+	echo " \
 		\`define ROM0_DATA 'h$(shell cat rom_0.dat)\n\
 		\`define ROM_PATH \"$(shell pwd)\" " \
 		> rom.svh
@@ -71,7 +75,8 @@ parameter:
 # parameters for ntt
 	@echo " \
 		\`define Q $(Q)\n\
-		\`define NTT_STAGE_CNT $(NTT_STAGE_CNT) " \
+		\`define NTT_STAGE_CNT $(NTT_STAGE_CNT)\n\
+		\`define $(MO_MUL_TYPE)" \
 		> ntt_param.svh
 
 gen_files: rom_data parameter

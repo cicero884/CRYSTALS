@@ -1,8 +1,8 @@
 /************
 testbench for check correct of mo_mul
 ************/
-`include "mo_mul.svh"
 `include "ntt_param.svh"
+`include "mo_mul.svh"
 
 `define CYCLE 10.0
 
@@ -28,8 +28,13 @@ logic [`DATA_WIDTH-1:0] in1=1,in2=1;
 logic [`DATA_WIDTH-1:0] out,min=`Q,max='0;
 logic [`DATA_WIDTH-1:0] in1_delay[`MUL_STAGE_CNT+1],in2_delay[`MUL_STAGE_CNT+1];
 int gold,real_out;
+`ifdef MULTYPE_KRED
+assign gold = (in1_delay[`MUL_STAGE_CNT]*in2_delay[`MUL_STAGE_CNT]*(`Q_K**`KRED_L))%`Q;
+assign real_out = out%`Q;
+`else
 assign gold = (in1_delay[`MUL_STAGE_CNT]*in2_delay[`MUL_STAGE_CNT])%`Q;
 assign real_out = ((1<<`DATA_WIDTH)*out)%`Q;
+`endif
 logic finish='0,out_en='0;
 logic countdown;
 assign in1_delay[0] = in1;

@@ -13,7 +13,7 @@ You may need to edit this to read different data input!
 //`define TB_PATH "."
 `define NTT
 
-`define CYCLE     4.198
+`define CYCLE     3.0
 `define MAX_CYCLE 14000000
 `timescale 1ns/100fs
 
