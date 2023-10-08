@@ -4,9 +4,12 @@ set_host_options -max_cores 16
 # Read all Files
 
 #set top geofence
-read_file -autoread -top ${top} ${src_file} -library ${top}
-current_design ${top}
-link
+analyze ${src_file} -autoread
+elaborate ${top}
+#set hdlin_auto_save_templates TRUE
+#read_file -autoread -top ${top} ${src_file} -library ${top}
+#current_design ${top}
+#link
 
 # Setting Clock Constraits
 source -echo -verbose ${sdc_file}
@@ -47,5 +50,3 @@ write_file -format verilog -hierarchy -output ./syn/${top}_syn.v
 report_area > area.log
 report_timing > timing.log
 report_qor > ${top}_qor.log
-
-exit

@@ -26,19 +26,22 @@ end
 */
 //`define ABS(a,b) ((a>b)? a-b:b-a)
 //`define MAX(a,b) ()
-
+import ntt_pkg::*;
 module fifo_cts (
 	input clk, input rst,
 	//fifo_ctrl_io fifo_ctrl_if
-	input fifo_en[`NTT_STAGE_CNT],
-	output [`MAX_FIFO_ADDR_BITS-1:0] fifo2_addr[`NTT_STAGE_CNT],
+	input fifo_en[NTT_STAGE_CNT],
+	output [`MAX_FIFO_ADDR_BITS-1:0] fifo2_addr[NTT_STAGE_CNT],
 	output [`MAX_FIFO_ADDR_BITS-1:0] fifom_addr
 );
 // mul_stage fifo
-localparam int sizem = `MUL_STAGE_CNT-1;
+localparam int sizem = MUL_STAGE_CNT-1;
+logic [$clog2(sizem)-1:0] fifom_tmp_addr;
 fifo_counter #(.size(sizem)) fifom_ctrl(
-	.addr(fifom_addr),
+	.addr(fifom_tmp_addr),
 .*);
+if(sizem < 2) assign fifom_addr = '0;
+else assign fifom_addr = `MAX_FIFO_ADDR_BITS'(fifom_tmp_addr);
 
 // fifo2
 // kyber 7 stage as example, HRS in intt=
@@ -47,13 +50,14 @@ fifo_counter #(.size(sizem)) fifom_ctrl(
 // then calculate the abs with MUL_STAGE_CNT
 genvar i;
 generate
-for (i=0; i<`NTT_STAGE_CNT-1 ; i++) begin
-	localparam int size2 = `ABS((1<<(i)), `MUL_STAGE_CNT) - 1;
+for (i=0; i<NTT_STAGE_CNT-1 ; i++) begin
+	localparam int size2 = abs((1<<(i)), MUL_STAGE_CNT) - 1;
 	logic [$clog2(size2)-1:0] fifo2_tmp_addr;
 	fifo_counter #(.size(size2)) fifo2_ctrl(
 		.addr(fifo2_tmp_addr),
 	.*);
-	assign fifo2_addr[i] = fifo2_tmp_addr;
+	if(size2 < 2) assign fifo2_addr[i] = '0;
+	else assign fifo2_addr[i] = `MAX_FIFO_ADDR_BITS'(fifo2_tmp_addr);
 end
 endgenerate
 endmodule: fifo_cts
@@ -96,7 +100,7 @@ case(DEPTH)
 	default: begin
 		logic [$clog2(DEPTH)-1:0] in_range_addr;
 		assign in_range_addr = addr[$clog2(DEPTH)-1:0];
-		logic [WIDTH-1:0] ram[DEPTH];
+		logic [WIDTH-1:0] ram[(DEPTH>0)? DEPTH:1];
 		always_ff @(posedge clk) begin
 			ram[in_range_addr] <= in;
 			out <= ram[in_range_addr];

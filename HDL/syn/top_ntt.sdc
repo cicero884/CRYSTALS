@@ -1,6 +1,6 @@
 # operating conditions and boundary conditions #
 
-#create_clock -period 10.000 -name clk [get_ports clk]
+create_clock -period 10.000 -name clk [get_ports clk]
 
 set_dont_touch_network      [all_clocks]
 set_fix_hold                [all_clocks]
@@ -8,11 +8,11 @@ set_clock_uncertainty 0.200 [all_clocks]
 set_clock_uncertainty 0.200 [all_clocks]
 set_clock_latency 0.500 [all_clocks]
 set_clock_latency 0.500 [all_clocks]
-#set_ideal_network           [get_ports clk]
+set_ideal_network           [get_ports clk]
 
 
 #Don't touch the basic env setting as below
-#set_input_delay  0   -clock clk [remove_from_collection [all_inputs] [get_ports clk]] -clock_fall
+set_input_delay  0   -clock clk [remove_from_collection [all_inputs] [get_ports clk]] -clock_fall
 set_output_delay -clock clk -clock_fall 0.000 [all_outputs]
 set_output_delay -clock clk -clock_fall 0.000 [all_outputs]
 

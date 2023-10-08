@@ -5,21 +5,24 @@ define NTT,PWM,INTT to test what function you want to test
 
 You may need to edit this to read different data input!
 ***********/
-`include "ntt.svh"
-`include "add_sub.svh"
-`include "mo_mul.svh"
-`include "fifo.svh"
+//`include "ntt_param.svh"
+//`include "rom.svh"
+//`include "ntt.svh"
+//`include "add_sub.svh"
+//`include "mo_mul.svh"
+//`include "fifo.svh"
+
 `define TB_PATH "/home/cicero/code/kyber/ref"
-//`define TB_PATH "."
+//`define TB_PATH "/home/ic_contest/509/kyber_test_data/"
 `define NTT
 
-`define CYCLE     3.0
+`define CYCLE     10.0
 `define MAX_CYCLE 14000000
-`timescale 1ns/100fs
 
-`define DATA_SIZE (2<<`NTT_STAGE_CNT)
+`define DATA_SIZE (2<<NTT_STAGE_CNT)
 
 module tb_ntt();
+import ntt_pkg::*;
 
 logic clk = '0,rst;
 always begin 
@@ -30,9 +33,9 @@ end
 `endif
 
 // maybe need to remove *2 if it's not kyber, check your algorithm
-logic [`DATA_WIDTH-1:0]data_in[`DATA_SIZE];
-logic [`DATA_WIDTH-1:0]data_in2[`DATA_SIZE];
-logic [`DATA_WIDTH-1:0]data_out[`DATA_SIZE];
+logic [DATA_WIDTH-1:0]data_in[`DATA_SIZE];
+logic [DATA_WIDTH-1:0]data_in2[`DATA_SIZE];
+logic [DATA_WIDTH-1:0]data_out[`DATA_SIZE];
 
 integer fd_in, fd_out;
 
@@ -77,9 +80,9 @@ end
 */
 int in_cnt, out_cnt;
 int data_cnt,err_cnt;
-logic [`DATA_WIDTH-1:0] in[2],in2[2],out[2];
+logic [DATA_WIDTH-1:0] in[2],in2[2],out[2];
 logic [$clog2(`DATA_SIZE)-1:0] out_addr[2];
-logic [`DATA_WIDTH-1:0] data_ignore[2][2];
+logic [DATA_WIDTH-1:0] data_ignore[2][2];
 logic en_ignore[2];
 logic in_en, out_en;
 
@@ -205,9 +208,9 @@ top_ntt u_top_ntt(
 
 `endif
 
-function logic [`DATA_WIDTH-1:0] unsign_mod(logic signed [15:0] in);
-	in %= `Q;
-	if(in<0) in += `Q;
+function logic [DATA_WIDTH-1:0] unsign_mod(logic signed [15:0] in);
+	in %= Q;
+	if(in<0) in += Q;
 	return in;
 endfunction
 
@@ -254,14 +257,9 @@ always_ff @(negedge clk, posedge rst) begin
 end
 
 // output cnt ctl
-initial begin
-	for(int i = 0; i < `DATA_SIZE; ++i) begin
-		if(!$fscanf(fd_out, "%h", origin_data)) $display("output Read err");
-		data_out[i] <= unsign_mod(origin_data);
-	end
-end
 // cache it~!
-logic [`DATA_WIDTH-1:0] out_delay[2];
+logic initial_read_out_data;
+logic [DATA_WIDTH-1:0] out_delay[2];
 logic out_en_delay[2];
 int latency;
 logic latency_cnt_en;
@@ -278,6 +276,7 @@ always_ff @(posedge clk) begin
 end
 always_ff @(posedge clk) begin
 	if(rst) begin
+		initial_read_out_data <= '0;
 		out_cnt <= 0;
 		data_cnt <= 0;
 		err_cnt <= 0;
@@ -286,6 +285,13 @@ always_ff @(posedge clk) begin
 	else begin
 		if(latency_cnt_en) latency <= latency+1;
 		if(out_en_delay[0]!==out_en_delay[1]) $display("latency is : %d cycles",latency);
+		if(!initial_read_out_data) begin
+			initial_read_out_data <= '1;
+			for(int i = 0; i < `DATA_SIZE; ++i) begin
+				if(!$fscanf(fd_out, "%h", origin_data)) $display("output Read err");
+				data_out[i] <= unsign_mod(origin_data);
+			end
+		end
 
 		if(out_en_delay[0]) begin
 			if(out_cnt == `DATA_SIZE/2-1) begin

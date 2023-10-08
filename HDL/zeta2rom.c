@@ -74,7 +74,7 @@ int main(int argc,char *argv[]){
 		// pre-multiply with numbers for later mo_mul
 		// for k-red require k^(-l)
 		// for MWR2MM require 2^n(FIXME)
-		if(argc>4 && (!strcmp(argv[3],"MULTYPE_KRED"))){
+		if(argc >= 4 && (!strcmp(argv[3],"MULTYPE_KRED"))){
 			//TODO:change 169 to be able to calculate
 			if(Q!=3329 && bit_size!=7){
 				printf("error: fix 169 to your k**l");

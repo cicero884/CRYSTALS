@@ -1,6 +1,6 @@
 # author:509
 # basic parameters
-
+SHELL := /bin/bash
 # require full path for vivodo
 ROM_PATH		= /home/cicero/code/CRYSTALS/HDL/
 
@@ -23,16 +23,18 @@ NTT_STAGE_CNT = 7
 #define to use which mo_mul
 #available: "MULTYPE_MWR2MM_O", "MULTYPE_KRED", "MULTYPE_MWR2MM_N"
 #default is "MULTYPE_MWR2MM_N"
-MO_MUL_TYPE = MULTYPE_KRED
-
+#MO_MUL_TYPE = MULTYPE_KRED
+MO_MUL_TYPE = MULTYPE_MWR2MM_N
 
 ##############
 
 # files you dont need to synthesize
+PKG_FILE		=	ntt_pkg.sv
 TB_TOP_FILE		=	tb_ntt.sv
 TB_MUL_TOP_FILE	=	tb_mul.sv
 # files you want synthesize
-TOP_FILE		=	top_ntt.sv add_sub.sv fifo.sv mo_mul.sv ntt.sv zeta_rom.sv intt.sv 
+TOP_FILE		=	top_ntt.sv add_sub.sv fifo.sv mo_mul.sv ntt.sv zeta_rom.sv intt.sv
+#add_sub.svh fifo.svh mo_mul.svh ntt.svh ntt_param.svh rom.svh
 MUL_TOP_FILE	=	mo_mul.sv
 # top module
 TOP			=	top_ntt
@@ -52,8 +54,8 @@ default:
 	@echo "clean      => Clear file after synthesize"
 	@echo "-----------------"
 	@echo "gen_files  => Generate all require file by parameter in Makefile"
-	@echo "rom_data   => Generate rom data and rom.svh"
-	@echo "parameter  => Generate parameter.svh"
+	@echo "zeta2rom   => make zeta2rom which calculate zeta_rom values"
+	@echo "gen_rom    => run zeta2rom calculate rom values"
 
 all: gtech_ntt syn gate
 
@@ -61,25 +63,26 @@ all: gtech_ntt syn gate
 		#-debug_access+all \
 		#-debug_pp +v2k +memcbk \
 
-rom_data: zeta2rom.c
-	rm ./*.dat -f
-	rm rom.svh -f
+zeta2rom: zeta2rom.c
 	gcc zeta2rom.c -o zeta2rom -std=c99
-	@./zeta2rom $(NTT_STAGE_CNT) $(Q) $(MO_MUL_TYPE) & \
-	echo " \
-		\`define ROM0_DATA 'h$(shell cat rom_0.dat)\n\
-		\`define ROM_PATH \"$(shell pwd)\" " \
-		> rom.svh
 
-parameter: 
+gen_rom: zeta2rom
+	./zeta2rom $(NTT_STAGE_CNT) $(Q) $(MO_MUL_TYPE)
+
+gen_files: gen_rom
 # parameters for ntt
-	@echo " \
-		\`define Q $(Q)\n\
-		\`define NTT_STAGE_CNT $(NTT_STAGE_CNT)\n\
-		\`define $(MO_MUL_TYPE)" \
-		> ntt_param.svh
-
-gen_files: rom_data parameter
+	echo -e " \
+		//THIS IS GENERATED FILE!\n\
+		parameter Q=$(Q);\n\
+		parameter NTT_STAGE_CNT=$(NTT_STAGE_CNT);\n\
+		\`define $(MO_MUL_TYPE)\n\
+		\`define MAX_FIFO_ADDR_BITS 30" \
+		> ntt_param.svh;
+	echo -e " \
+		//THIS IS GENERATED FILE!\n\
+		parameter ROM0_DATA='h$(shell cat rom_0.dat);\n\
+		parameter ROM_PATH=\"$(shell pwd)\";" \
+		> rom.svh;
 	@echo "all file generated!"
 
 mul_test:
@@ -91,8 +94,8 @@ mul_test:
 		-sverilog \
 		-l mo_mul.log
 
-gtech_ntt: rom_data parameter
-	vcs -R $(TB_TOP_FILE) $(TOP_FILE) \
+gtech_ntt: gen_files
+	vcs -R $(PKG_FILE) $(TB_TOP_FILE) $(TOP_FILE) \
 		-sverilog \
 		-l ntt.log \
 		+vcs+fsdbon \
@@ -101,8 +104,8 @@ gtech_ntt: rom_data parameter
 		+fsdbfile+ntt.fsdb \
 		+define+NTT
 
-gtech_intt: rom_data parameter
-	vcs -R $(TB_TOP_FILE) $(TOP_FILE) \
+gtech_intt: gen_files
+	vcs -R $(PKG_FILE) $(TB_TOP_FILE) $(TOP_FILE) \
 		+vcs+fsdbon \
 		+fsdb+mda \
 		+access+R \
@@ -115,22 +118,22 @@ gtech_intt: rom_data parameter
 nw:
 	nWave -f *.fsdb -sswr signal.rc +access+r
 
-syn syn/$(TOP)_syn.v: rom_data parameter
+syn syn/$(TOP)_syn.v: gen_files
 
 ifneq ($(wildcard ./syn),)
 	dc_shell -f syn/syn.tcl -output_log_file syn.log -x \
 		"\
 		set top $(TOP); \
-		set src_file {$(TOP_FILE)}; \
+		set src_file {$(PKG_FILE) $(TOP_FILE)}; \
 		set sdc_file $(SDC); \
 		";
 
 else
 	@echo "syn folder with syn.tcl & tsmc13_neg.v inside require!"
 endif
-
-gate_ntt: syn
-	vcs -R $(TB_TOP_FILE) syn/$(TOP)_syn.v syn/tsmc13_neg.v \
+#syn/$(TOP)_syn.v
+gate_ntt: 
+	vcs -R $(PKG_FILE) $(TB_TOP_FILE) syn/$(TOP)_syn.v syn/tsmc13_neg.v \
 		-sverilog \
 		-debug_access+all \
 		-diag=sdf:verbose \

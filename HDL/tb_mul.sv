@@ -1,9 +1,6 @@
 /************
 testbench for check correct of mo_mul
 ************/
-`include "ntt_param.svh"
-`include "mo_mul.svh"
-
 `define CYCLE 10.0
 
 module tb_mul();
@@ -23,27 +20,27 @@ initial begin
 	//$dumpon;
 end
 
-//logic signed [`DATA_WIDTH-1:0] in2='0;
-logic [`DATA_WIDTH-1:0] in1=1,in2=1;
-logic [`DATA_WIDTH-1:0] out,min=`Q,max='0;
-logic [`DATA_WIDTH-1:0] in1_delay[`MUL_STAGE_CNT+1],in2_delay[`MUL_STAGE_CNT+1];
+//logic signed [DATA_WIDTH-1:0] in2='0;
+logic [DATA_WIDTH-1:0] in1=1,in2=1;
+logic [DATA_WIDTH-1:0] out,min=Q,max='0;
+logic [DATA_WIDTH-1:0] in1_delay[MUL_STAGE_CNT+1],in2_delay[MUL_STAGE_CNT+1];
 int gold,real_out;
 `ifdef MULTYPE_KRED
-assign gold = (in1_delay[`MUL_STAGE_CNT]*in2_delay[`MUL_STAGE_CNT]*(`Q_K**`KRED_L))%`Q;
-assign real_out = out%`Q;
+assign gold = (in1_delay[MUL_STAGE_CNT]*in2_delay[MUL_STAGE_CNT]*(Q_K**KRED_L))%Q;
+assign real_out = out%Q;
 `else
-assign gold = (in1_delay[`MUL_STAGE_CNT]*in2_delay[`MUL_STAGE_CNT])%`Q;
-assign real_out = ((1<<`DATA_WIDTH)*out)%`Q;
+assign gold = (in1_delay[MUL_STAGE_CNT]*in2_delay[MUL_STAGE_CNT])%Q;
+assign real_out = ((1<<DATA_WIDTH)*out)%Q;
 `endif
 logic finish='0,out_en='0;
 logic countdown;
 assign in1_delay[0] = in1;
 assign in2_delay[0] = in2;
 always_ff @(posedge clk) begin
-	if(in1 < `Q) begin
+	if(in1 < Q) begin
 		{in1,in2} <= {in1,in2}+1;
 		/*
-		if(in2 < `Q) in2 <= in2+1;
+		if(in2 < Q) in2 <= in2+1;
 		else begin
 			in2 <= '0;
 			in1 <= in1+1;
@@ -55,7 +52,7 @@ always_ff @(posedge clk) begin
 		in1 <= '0;
 	end
 	//{finish,in1,in2} <= {finish,in1,in2} + 1;
-	for(int i=1; i<=`MUL_STAGE_CNT; i++) begin
+	for(int i=1; i<=MUL_STAGE_CNT; i++) begin
 		in1_delay[i] <= in1_delay[i-1];
 		in2_delay[i] <= in2_delay[i-1];
 	end
@@ -65,13 +62,13 @@ always_ff @(posedge clk) begin
 	if(real_out<min) min <= real_out;
 	if(real_out>max) max <= real_out;
 
-	if($unsigned(in2)>`MUL_STAGE_CNT) out_en<=1;
+	if($unsigned(in2)>MUL_STAGE_CNT) out_en<=1;
 	if(out_en) begin
 		if(gold == real_out) begin end
-		else $display("%d * %d = %d != %d (%d)\n",in1_delay[`MUL_STAGE_CNT],in2_delay[`MUL_STAGE_CNT],gold,real_out,out);
+		else $display("%d * %d = %d != %d (%d)\n",in1_delay[MUL_STAGE_CNT],in2_delay[MUL_STAGE_CNT],gold,real_out,out);
 	end
 
-	if(finish && in2 >= `MUL_STAGE_CNT+1) $finish;
+	if(finish && in2 >= MUL_STAGE_CNT+1) $finish;
 end
 mo_mul u_mul(.a(in1),.b(in2),.result(out),.*);
 
