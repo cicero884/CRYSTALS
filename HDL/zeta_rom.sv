@@ -9,16 +9,16 @@ module duel_rom #(parameter STAGE)(
 );
 logic [DATA_WIDTH-1:0] rom[(1<<STAGE)];
 
-//string fname;
-
+`define FAKE_ROM
+`ifdef FAKE_ROM // temperary test for asic without memory generator
+`include "fake_rom.svh"
+always_ff @(posedge clk) begin
+	data[0] <= zeta_rom_array[(1<<STAGE)+addr[0][STAGE-1:0]];
+	data[1] <= zeta_rom_array[(1<<STAGE)+addr[1][STAGE-1:0]];
+end
+`else // work in ISE, for asic you should use memory generator
 initial begin
-    //$sformat(fname ,"rom_%0d.rom", STAGE);
-	//$readmemh($sformatf("rom_%0d.rom", STAGE), rom);
-
-	// I know this is dumb, but I cant find better way for vivodo 2018
-	// if you are not using vivodo, you should use memory generator
 	localparam bit [7:0] asscii_index = "0" + STAGE;
-	//localparam path = get_path_from_file(`__FILE__);
 	localparam fname = {ROM_PATH,"/rom_",asscii_index,".dat"};
 	if(STAGE > 9) begin
 		$display("Error! the STAGE is over one digit, consider fix it in zeta_rom");
@@ -31,7 +31,7 @@ always_ff @(posedge clk) begin
 	data[0] <= rom[addr[0][STAGE-1:0]];
 	data[1] <= rom[addr[1][STAGE-1:0]];
 end
-
+`endif
 endmodule
 
 

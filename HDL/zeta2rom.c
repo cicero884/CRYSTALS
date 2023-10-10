@@ -80,7 +80,7 @@ int main(int argc,char *argv[]){
 
 	remove("fake_rom.svh");
 	FILE *frfp = fopen("fake_rom.svh","w");
-	fprintf(frfp,"parameter [%d:0] zeta_rom[%d] = '{\n",__builtin_ctzll(data_max)-1,(1<<bit_size));
+	fprintf(frfp,"parameter [%d:0] zeta_rom_array[%d] = '{\n",__builtin_ctzll(data_max)-1,(1<<bit_size));
 	fprintf(frfp,"%llu",zeta);
 
 	unsigned rom_index=0;
