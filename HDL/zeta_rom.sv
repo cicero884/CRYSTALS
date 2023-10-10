@@ -9,7 +9,6 @@ module duel_rom #(parameter STAGE)(
 );
 logic [DATA_WIDTH-1:0] rom[(1<<STAGE)];
 
-`define FAKE_ROM
 `ifdef FAKE_ROM // temperary test for asic without memory generator
 `include "fake_rom.svh"
 always_ff @(posedge clk) begin
