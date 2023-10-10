@@ -31,11 +31,11 @@ if(isNTT) begin
 	logic signed [DATA_WIDTH:0] sub;
 	always_ff @(posedge clk) begin
 		add <= in[0]+in[1];
-		sub <= in[0]-in[1];
+		sub <= signed'({1'b0,in[0]})-signed'({1'b0,in[1]});
 
 		// reduce width
 		out[0] <= (add[DATA_WIDTH])? add-Q :add;
-		out[1] <= (sub[DATA_WIDTH])? sub+Q :sub;
+		out[1] <= (sub[DATA_WIDTH])? unsigned'(sub+Q) :unsigned'(sub);
 	end
 end
 else begin

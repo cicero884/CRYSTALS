@@ -71,7 +71,7 @@ always_ff @(posedge clk, posedge rst) begin
 		addr <= '0;
 	end
 	else begin
-		if (addr < size-1) addr <= addr+1;
+		if (signed'({1'b0,addr}) < size-1) addr <= addr+1;
 		else addr <= '0;
 	end
 end

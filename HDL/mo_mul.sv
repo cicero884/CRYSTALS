@@ -110,7 +110,7 @@ logic [DATA_WIDTH-1:0] out_ss;
 logic [DATA_WIDTH:Q_M] t;
 logic [DATA_WIDTH-1:Q_M] nu;
 assign t[Q_M] = '0;
-assign minus_q = (out_ss[0])? Q:0;
+assign minus_q = (out_ss[0])? unsigned'(Q):0;
 assign out.ss = {t[DATA_WIDTH],out_ss[DATA_WIDTH-1:1]};
 always_comb begin
 	for(int i=0; i<DATA_WIDTH; i++) begin

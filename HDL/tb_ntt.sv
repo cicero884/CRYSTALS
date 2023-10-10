@@ -12,11 +12,11 @@ You may need to edit this to read different data input!
 //`include "mo_mul.svh"
 //`include "fifo.svh"
 
-`define TB_PATH "/home/cicero/code/kyber/ref"
-//`define TB_PATH "/home/ic_contest/509/kyber_test_data/"
+//`define TB_PATH "/home/cicero/code/kyber/ref"
+`define TB_PATH "/home/ic_contest/509/kyber_test_data/"
 `define NTT
 
-`define CYCLE     10.0
+`define CYCLE     4.0
 `define MAX_CYCLE 14000000
 
 `define DATA_SIZE (2<<NTT_STAGE_CNT)
