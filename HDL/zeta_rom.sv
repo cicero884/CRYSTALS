@@ -19,7 +19,7 @@ initial begin
 	// if you are not using vivodo, you should use memory generator
 	localparam bit [7:0] asscii_index = "0" + STAGE;
 	//localparam path = get_path_from_file(`__FILE__);
-	localparam fname = {"/home/ic_contest/509/CRYSTALS/HDL","/rom_",asscii_index,".dat"};
+	localparam fname = {ROM_PATH,"/rom_",asscii_index,".dat"};
 	if(STAGE > 9) begin
 		$display("Error! the STAGE is over one digit, consider fix it in zeta_rom");
 		$finish;

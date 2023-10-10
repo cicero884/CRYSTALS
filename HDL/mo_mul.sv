@@ -22,8 +22,7 @@ module mo_mul #(parameter WIDTH=DATA_WIDTH)(
 	output logic [DATA_WIDTH-1:0] result
 );
 
-
-`ifdef MULTYPE_MWR2MM_O
+/*old MWR2MM
 logic [WIDTH-1:0] tmp_b[WIDTH+1];
 logic [DATA_WIDTH-1:0] tmp_a[WIDTH+1];
 assign tmp_a[0] = a;
@@ -48,7 +47,8 @@ always_ff @(posedge clk) begin
 	end
 	result <= (data[WIDTH][DATA_WIDTH])? DATA_WIDTH'(data[WIDTH]+Q) : DATA_WIDTH'(data[WIDTH]);
 end
-`elsif MULTYPE_KRED
+*/
+`ifdef MULTYPE_KRED
 initial begin
 	if(WIDTH != DATA_WIDTH) $display("error: K_RED only support WIDTH=DATA_WIDTH");
 end
@@ -71,7 +71,7 @@ always_ff @(posedge clk) begin
 	else if(c[KRED_L]<0) result <= c[KRED_L]+Q;
 	else result <= c[KRED_L];
 end
-`else //default : MWR2MM_N
+`else //default : MWR2MM
 logic [WIDTH-1:0] tmp_b[WIDTH+1];
 logic [DATA_WIDTH-1:0] tmp_a[WIDTH+1];
 assign tmp_a[0] = a;

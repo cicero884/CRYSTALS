@@ -21,10 +21,10 @@ NTT_STAGE_CNT = 7
 #NTT_STAGE_CNT = 9
 
 #define to use which mo_mul
-#available: "MULTYPE_MWR2MM_O", "MULTYPE_KRED", "MULTYPE_MWR2MM_N"
-#default is "MULTYPE_MWR2MM_N"
+#available: "MULTYPE_KRED", "MULTYPE_MWR2MM"
+#default is "MULTYPE_MWR2MM"
 #MO_MUL_TYPE = MULTYPE_KRED
-MO_MUL_TYPE = MULTYPE_MWR2MM_N
+MO_MUL_TYPE = MULTYPE_MWR2MM
 
 ##############
 
@@ -162,5 +162,5 @@ clean:
 # simulation files
 	rm ./*.err ./*.log syn/$(TOP)_syn* *.fsdb irun.history -f
 # generated files
-	rm *.dat ntt_param.svh rom.svh zeta2rom -f
+	rm *.dat ntt_param.svh rom.svh fake_rom.svh zeta2rom -f
 

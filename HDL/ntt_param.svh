@@ -1,5 +1,0 @@
- 	//THIS IS GENERATED FILE!
-	parameter Q=3329;
-	parameter NTT_STAGE_CNT=7;
-	`define MULTYPE_MWR2MM_N
-	`define MAX_FIFO_ADDR_BITS 30

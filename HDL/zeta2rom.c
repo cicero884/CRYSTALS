@@ -11,7 +11,7 @@
 #include<stdlib.h>
 #include<string.h>
 unsigned bit_size;
-long long unsigned Q;
+long long unsigned Q, bias, zeta;
 // return MSB*2
 long long unsigned MSB_2(long long unsigned msb_q){
 	for(int i=1; i <= 32; i<<=1){
@@ -28,17 +28,36 @@ long long unsigned inverse(long long unsigned a){
 	return 0;
 }
 int main(int argc,char *argv[]){
-	if(argc < 3){
-		printf("input : argv1=log2(poly size), argv2=Q, [argv3=mul_type], [argv4=root of unity]\n");
-		printf("for kyber is 7 3329 [mul type] 17\n");
-		printf("ex: %s 7 3329 MULTYPE_MWR2MM_N 17\n",argv[0]);
-		printf("or: %s 7 3329\n",argv[0]);
+	if(argc < 4){
+		printf("input : argv1=log2(poly size), argv2=Q, [argv3=MUL_TYPE], [argv4=root of unity]\n");
+		printf("for kyber with MWR2MM is 7 3329 MULTYPE_MWR2MM 17\n");
+		printf("for kyber with K-RED  is 7 3329 MULTYPE_KRED 17\n");
+		printf("ex: %s 7 3329 MULTYPE_MWR2MM 17\n",argv[0]);
+		printf("or: %s 7 3329 MULTYPE_MWR2MM\n",argv[0]);
 		return 1;
 	}
 	bit_size = atoi(argv[1]);
 	Q = atoi(argv[2]);
-	long long unsigned zeta;
-	if(argc == 4){
+
+	// calculate bias
+	long long unsigned data_max = MSB_2(Q);
+	if(!strcmp(argv[3],"MULTYPE_KRED")){
+		// Q=(q_k<<q_m)+1
+		int q_m = __builtin_popcount((Q-2)^Q);
+		int l = (__builtin_ctzll(data_max)-1)/q_m+1;
+		int q_k = Q>>q_m;
+		printf("q_k=%d, q_m=%d l=%d\n",q_k,q_m,l);
+		bias = 1;
+		while(l--) bias = (bias*q_k)%Q;
+		bias = inverse(bias)%Q;
+	}
+	else if(!strcmp(argv[3],"MULTYPE_MWR2MM")){
+		bias = data_max%Q;
+	}
+	printf("bias = %llu\n",bias);
+
+	// calculate root of unity
+	if(argc < 5){ 
 		long long unsigned i;
 		for(i=2; i<Q; i++){
 			long long unsigned tmp = i;
@@ -51,20 +70,23 @@ int main(int argc,char *argv[]){
 	}
 	else zeta = atoi(argv[4]);
 
-	unsigned zeta_2[bit_size];
-	zeta_2[0] = zeta;
 	// pre calculate zeta^1,zeta^2,zeta^4,zeta^8....zeta^64
 	// inside zeta_2[0],zeta[1]...zeta[6];
+	unsigned zeta_2[bit_size];
+	zeta_2[0] = zeta;
 	for(int i=1; i<bit_size; ++i){
 		zeta_2[i] = ((unsigned long long)zeta_2[i-1]*zeta_2[i-1])%Q;
 	}
 
+	remove("fake_rom.svh");
+	FILE *frfp = fopen("fake_rom.svh","w");
+	fprintf(frfp,"parameter [%d:0] zeta_rom[%d] = '{\n",__builtin_ctzll(data_max)-1,(1<<bit_size));
+	fprintf(frfp,"%llu",zeta);
+
 	unsigned rom_index=0;
-	unsigned out_num;
+	unsigned long long out_num;
 	FILE *fd = NULL;
 	char fname[30];
-	//sprintf(fname,"rom_%d.rom",rom_index);
-	//fd = fopen(fname,"w");
 	for(int i=1; i<(1<<(bit_size)); ++i){
 		out_num=1;
 		for(int j=0; j<bit_size; j++){
@@ -73,16 +95,8 @@ int main(int argc,char *argv[]){
 		}
 		// pre-multiply with numbers for later mo_mul
 		// for k-red require k^(-l)
-		// for MWR2MM require 2^n(FIXME)
-		if(argc >= 4 && (!strcmp(argv[3],"MULTYPE_KRED"))){
-			//TODO:change 169 to be able to calculate
-			if(Q!=3329 && bit_size!=7){
-				printf("error: fix 169 to your k**l");
-				return 1;
-			}
-			out_num = (out_num * inverse(169)) % Q;
-		}
-		else out_num = (out_num * MSB_2(Q)) % Q;
+		// for MWR2MM require 2^n
+		out_num = (out_num*bias)%Q;
 
 		if(!(i&(i-1))){
 			if(fd) {
@@ -93,8 +107,11 @@ int main(int argc,char *argv[]){
 			rom_index++;
 		}
 		else fprintf(fd," ");
-		fprintf(fd,"%x",out_num);
+		fprintf(fd,"%llx",out_num);
+		fprintf(frfp,", %llu",out_num);
 	}
 	fclose(fd);
+	fprintf(frfp,"\n};");
+	fclose(frfp);
 	return 0;
 }

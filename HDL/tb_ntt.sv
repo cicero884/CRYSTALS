@@ -12,8 +12,8 @@ You may need to edit this to read different data input!
 //`include "mo_mul.svh"
 //`include "fifo.svh"
 
-//`define TB_PATH "/home/cicero/code/kyber/ref"
-`define TB_PATH "/home/ic_contest/509/kyber_test_data/"
+`define TB_PATH "/home/cicero/code/kyber/ref"
+//`define TB_PATH "/home/ic_contest/509/kyber_test_data/"
 `define NTT
 
 `define CYCLE     4.0
