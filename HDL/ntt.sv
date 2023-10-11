@@ -182,7 +182,8 @@ module ntt_ss #(parameter SWITCH_INDEX)(
 	output logic [NTT_STAGE_CNT-2:0] rom_addr,input [DATA_WIDTH-1:0] rom_data,
 	input [`MAX_FIFO_ADDR_BITS-1:0] fifo2_addr
 );
-logic [NTT_STAGE_CNT-2:0] ctl_cnt, ctl_delay;
+localparam out_max_cnt = MUL_STAGE_CNT+ADD_SUB_STAGE_CNT+1;
+logic [max(NTT_STAGE_CNT-2,$clog2(out_max_cnt)):0] ctl_cnt, ctl_delay;
 logic [DATA_WIDTH-1:0] in1_delay;
 //logic switch_delay;
 // counter for control switch & rom
@@ -239,7 +240,6 @@ add_sub #(.isNTT(1)) as_s(
 	.out(out),
 .*);
 // out_en
-localparam out_max_cnt = MUL_STAGE_CNT+ADD_SUB_STAGE_CNT+1;
 always_ff @(posedge clk,posedge rst) begin
 	if(rst) begin
 		out_en <= '0;

@@ -1,8 +1,6 @@
 # author:509
 # basic parameters
 SHELL := /bin/bash
-# require full path for vivodo
-ROM_PATH		= /home/cicero/code/CRYSTALS/HDL/
 
 # kyber
 Q = 3329
@@ -24,7 +22,7 @@ NTT_STAGE_CNT = 7
 #available: "MULTYPE_KRED", "MULTYPE_MWR2MM"
 #default is "MULTYPE_MWR2MM"
 #MO_MUL_TYPE = MULTYPE_KRED
-MO_MUL_TYPE = MULTYPE_MWR2MM
+MO_MUL_TYPE = MULTYPE_KRED
 
 ##############
 
