@@ -2,9 +2,11 @@
 # basic parameters
 SHELL := /bin/bash
 
+# available ALGORITHM: ALG_CRYSTALS ALG_DIFDIT
 # kyber
 Q = 3329
-NTT_STAGE_CNT = 7
+NTT_STAGE_CNT = 4
+ALGORITHM = ALG_DIFDIT
 
 # dilithium
 #Q = 8380417
@@ -17,6 +19,7 @@ NTT_STAGE_CNT = 7
 # qTESLA
 #Q = 343576577
 #NTT_STAGE_CNT = 9
+#ALGORITHM = DIFDIT
 
 #define to use which mo_mul
 #available: "MULTYPE_KRED", "MULTYPE_MWR2MM"
@@ -52,8 +55,7 @@ default:
 	@echo "clean      => Clear file after synthesize"
 	@echo "-----------------"
 	@echo "gen_files  => Generate all require file by parameter in Makefile"
-	@echo "zeta2rom   => make zeta2rom which calculate zeta_rom values"
-	@echo "gen_rom    => run zeta2rom calculate rom values"
+	@echo "gen_rom    => run gen_rom calculate rom values"
 
 all: gtech_ntt syn gate
 
@@ -61,11 +63,9 @@ all: gtech_ntt syn gate
 		#-debug_access+all \
 		#-debug_pp +v2k +memcbk \
 
-zeta2rom: zeta2rom.c
-	gcc zeta2rom.c -o zeta2rom -std=c99
-
-gen_rom: zeta2rom
-	./zeta2rom $(NTT_STAGE_CNT) $(Q) $(MO_MUL_TYPE)
+gen_rom: gen_rom.c Makefile
+	gcc gen_rom.c -o gen_rom -std=c99
+	./gen_rom $(NTT_STAGE_CNT) $(Q) $(ALGORITHM) $(MO_MUL_TYPE)
 
 gen_files: gen_rom
 # parameters for ntt
@@ -160,5 +160,5 @@ clean:
 # simulation files
 	rm ./*.err ./*.log syn/$(TOP)_syn* *.fsdb irun.history -f
 # generated files
-	rm *.dat ntt_param.svh rom.svh fake_rom.svh zeta2rom -f
+	rm *.dat ntt_param.svh rom.svh fake_rom.svh gen_rom -f
 
