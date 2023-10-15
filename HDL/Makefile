@@ -163,5 +163,5 @@ clean:
 # simulation files
 	rm ./*.err ./*.log syn/$(TOP)_syn* *.fsdb irun.history -f
 # generated files
-	rm *.dat ntt_param.svh rom.svh fake_rom.svh gen_rom -f
+	rm *.dat ntt_param.svh ntt_macro.svh rom.svh fake_rom.svh gen_rom -f
 
