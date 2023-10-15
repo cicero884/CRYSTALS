@@ -11,8 +11,8 @@ module intt(
 	input [DATA_WIDTH-1:0] rom_data[NTT_STAGE_CNT],
 
 	output logic fifo_en[NTT_STAGE_CNT],
-	input [`MAX_FIFO_ADDR_BITS-1:0] fifo2_addr[NTT_STAGE_CNT],
-	input [`MAX_FIFO_ADDR_BITS-1:0] fifom_addr
+	input [MAX_FIFO_ADDR_BITS-1:0] fifo2_addr[NTT_STAGE_CNT],
+	input [MAX_FIFO_ADDR_BITS-1:0] fifom_addr
 );
 logic [DATA_WIDTH-1:0] data[NTT_STAGE_CNT+1][2];
 logic en[NTT_STAGE_CNT+1], gclk[NTT_STAGE_CNT];
@@ -68,7 +68,7 @@ module intt_ss #(parameter STAGE)(
 	input in_en,input [DATA_WIDTH-1:0] in[2],
 	output logic out_en,output logic [DATA_WIDTH-1:0] out[2],
 	output logic [NTT_STAGE_CNT-2:0] rom_addr,input [DATA_WIDTH-1:0] rom_data,
-	input [`MAX_FIFO_ADDR_BITS-1:0] fifo2_addr
+	input [MAX_FIFO_ADDR_BITS-1:0] fifo2_addr
 );
 // component output
 logic [DATA_WIDTH-1:0] add_sub_out[2],mul_result;
@@ -132,7 +132,7 @@ if(STAGE == 0) begin
 end
 else begin
 	dp_ram #(.WIDTH(DATA_WIDTH), .DEPTH(HRS)) fifo1(
-		.addr(`MAX_FIFO_ADDR_BITS'(ctl_cnt[`INTT_SWITCH_CNT_BITS])),
+		.addr(MAX_FIFO_ADDR_BITS'(ctl_cnt[`INTT_SWITCH_CNT_BITS])),
 		.in(switch_data[1]), .out(out[1]), 
 	.*);
 end
@@ -158,7 +158,7 @@ module intt_sl #(parameter STAGE = NTT_STAGE_CNT-1)(
 	input in_en,input [DATA_WIDTH-1:0] in[2],
 	output logic out_en,output logic [DATA_WIDTH-1:0] out[2],
 	output logic [NTT_STAGE_CNT-2:0] rom_addr,input [DATA_WIDTH-1:0] rom_data,
-	input [`MAX_FIFO_ADDR_BITS-1:0] fifo1_addr, input [`MAX_FIFO_ADDR_BITS-1:0] fifo2_addr
+	input [MAX_FIFO_ADDR_BITS-1:0] fifo1_addr, input [MAX_FIFO_ADDR_BITS-1:0] fifo2_addr
 );
 logic [DATA_WIDTH-1:0] switch_data, fifo2_out, add_sub_out[2], mul_result;
 // add_sub
@@ -233,7 +233,7 @@ module intt_sf #(parameter STAGE = NTT_STAGE_CNT-1)(
 	input in_en,input [DATA_WIDTH-1:0] in[2],
 	output logic out_en,output logic [DATA_WIDTH-1:0] out[2],
 	output logic [NTT_STAGE_CNT-2:0] rom_addr,input [DATA_WIDTH-1:0] rom_data,
-	input [`MAX_FIFO_ADDR_BITS-1:0] fifo1_addr
+	input [MAX_FIFO_ADDR_BITS-1:0] fifo1_addr
 );
 logic [DATA_WIDTH-1:0] add_sub_out[2],mul_result;
 add_sub #(.isNTT(0)) as_0(

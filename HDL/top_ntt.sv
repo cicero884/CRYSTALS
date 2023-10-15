@@ -24,8 +24,8 @@ localparam ntt_cnt = 1;
 localparam intt_cnt = 1;
 
 logic ntt_en [ntt_cnt][NTT_STAGE_CNT], intt_en[ntt_cnt][NTT_STAGE_CNT], fifo_en[NTT_STAGE_CNT];
-logic [`MAX_FIFO_ADDR_BITS-1:0] fifo2_ntt_addr[NTT_STAGE_CNT], fifo2_intt_addr[NTT_STAGE_CNT], fifo2_addr[NTT_STAGE_CNT];
-logic [`MAX_FIFO_ADDR_BITS-1:0] fifom_addr;
+logic [MAX_FIFO_ADDR_BITS-1:0] fifo2_ntt_addr[NTT_STAGE_CNT], fifo2_intt_addr[NTT_STAGE_CNT], fifo2_addr[NTT_STAGE_CNT];
+logic [MAX_FIFO_ADDR_BITS-1:0] fifom_addr;
 /*
 FIXME: require casting to int for correct streaming operator
 
@@ -34,7 +34,7 @@ ex: the behavier is different under there
 assign fifo2_ntt_addr = {<<$clog2(32){fifo2_addr}};
 assign fifo2_ntt_addr = {<<5{fifo2_addr}};
 */
-assign fifo2_ntt_addr = {<<`MAX_FIFO_ADDR_BITS{fifo2_addr}};
+assign fifo2_ntt_addr = {<<MAX_FIFO_ADDR_BITS{fifo2_addr}};
 assign fifo2_intt_addr = fifo2_addr;
 always_comb begin
 	for (int i=0; i<NTT_STAGE_CNT; i++) begin

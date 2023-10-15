@@ -10,8 +10,8 @@ module ntt(
 	output logic[NTT_STAGE_CNT-2:0] rom_addr[NTT_STAGE_CNT],
 	input [DATA_WIDTH-1:0] rom_data[NTT_STAGE_CNT],
 	output fifo_en[NTT_STAGE_CNT],
-	input [`MAX_FIFO_ADDR_BITS-1:0] fifom_addr,
-	input [`MAX_FIFO_ADDR_BITS-1:0] fifo2_addr[NTT_STAGE_CNT]
+	input [MAX_FIFO_ADDR_BITS-1:0] fifom_addr,
+	input [MAX_FIFO_ADDR_BITS-1:0] fifo2_addr[NTT_STAGE_CNT]
 );
 logic [DATA_WIDTH-1:0] data[NTT_STAGE_CNT+1][2];
 logic en[NTT_STAGE_CNT+1], gclk[NTT_STAGE_CNT];
@@ -66,7 +66,7 @@ module ntt_s0(
 	input in_en,input [DATA_WIDTH-1:0] in[2],
 	output logic [NTT_STAGE_CNT-2:0] rom_addr,input [DATA_WIDTH-1:0] rom_data,
 	output logic out_en,output [DATA_WIDTH-1:0] out[2],
-	input [`MAX_FIFO_ADDR_BITS-1:0] fifo1_addr
+	input [MAX_FIFO_ADDR_BITS-1:0] fifo1_addr
 );
 logic [DATA_WIDTH-1:0] fifo1_out, mul_result;
 dp_ram #(.WIDTH(DATA_WIDTH), .DEPTH(MUL_STAGE_CNT-1)) s0_fifo(
@@ -117,7 +117,7 @@ module ntt_sl #(parameter SWITCH_INDEX)(
 	input in_en,input [DATA_WIDTH-1:0] in[2],
 	output logic out_en,output [DATA_WIDTH-1:0] out[2],
 	output logic [NTT_STAGE_CNT-2:0] rom_addr,input [DATA_WIDTH-1:0] rom_data,
-	input [`MAX_FIFO_ADDR_BITS-1:0] fifo1_addr, input [`MAX_FIFO_ADDR_BITS-1:0] fifo2_addr
+	input [MAX_FIFO_ADDR_BITS-1:0] fifo1_addr, input [MAX_FIFO_ADDR_BITS-1:0] fifo2_addr
 );
 logic [NTT_STAGE_CNT-2:0] ctl_cnt;
 // counter for control switch & rom
@@ -180,7 +180,7 @@ module ntt_ss #(parameter SWITCH_INDEX)(
 	input in_en,input [DATA_WIDTH-1:0] in[2],
 	output logic out_en,output [DATA_WIDTH-1:0] out[2],
 	output logic [NTT_STAGE_CNT-2:0] rom_addr,input [DATA_WIDTH-1:0] rom_data,
-	input [`MAX_FIFO_ADDR_BITS-1:0] fifo2_addr
+	input [MAX_FIFO_ADDR_BITS-1:0] fifo2_addr
 );
 localparam out_max_cnt = MUL_STAGE_CNT+ADD_SUB_STAGE_CNT+1;
 logic [max(NTT_STAGE_CNT-2,$clog2(out_max_cnt)):0] ctl_cnt, ctl_delay;
@@ -219,7 +219,7 @@ if (SWITCH_INDEX == 0) begin
 end
 else begin
 	dp_ram #(.WIDTH(DATA_WIDTH), .DEPTH(`HRS)) fifo1(
-		.addr(`MAX_FIFO_ADDR_BITS'(ctl_cnt[`NTT_SWITCH_CNT_BITS])),
+		.addr(MAX_FIFO_ADDR_BITS'(ctl_cnt[`NTT_SWITCH_CNT_BITS])),
 		.in(in[0]), .out(fifo1_out), 
 	.*);
 end

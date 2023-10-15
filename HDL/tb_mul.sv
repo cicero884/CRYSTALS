@@ -1,6 +1,7 @@
 /************
 testbench for check correct of mo_mul
 ************/
+`include "ntt_macro.svh"
 `define CYCLE 10.0
 
 module tb_mul();

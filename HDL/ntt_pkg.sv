@@ -2,7 +2,7 @@
 `define NTT_PKG_SVH
 `resetall
 `timescale 1ns/100fs
-
+`include "ntt_macro.svh"
 package ntt_pkg;
 `include "ntt_param.svh"
 `include "rom.svh"

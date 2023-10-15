@@ -48,7 +48,7 @@ PASS_STR	=	"ALL PASS"
 default:
 	@echo "mul_test   => Run test for mo_mul.sv"
 	@echo "gtech_ntt  => Run gtech level simulation of ntt"
-	@echo "gtech_intt => Run gtech level simulation of intt"
+	@echo "gtech_intt => Run gtech level simulation of intt(untest)"
 	@echo "nw         => Run nWave"
 	@echo "syn        => Run synthesize in interactive mode"
 	@echo "gate_ntt   => Run ntt gate-level simulation"
@@ -73,9 +73,12 @@ gen_files: gen_rom
 		//THIS IS GENERATED FILE!\n\
 		parameter Q=$(Q);\n\
 		parameter NTT_STAGE_CNT=$(NTT_STAGE_CNT);\n\
-		\`define $(MO_MUL_TYPE)\n\
-		\`define MAX_FIFO_ADDR_BITS 30" \
+		parameter MAX_FIFO_ADDR_BITS=30;" \
 		> ntt_param.svh;
+	echo -e " \
+		//THIS IS GENERATED FILE!\n\
+		\`define $(MO_MUL_TYPE)" \
+		> ntt_macro.svh;
 	echo -e " \
 		//THIS IS GENERATED FILE!\n\
 		parameter ROM0_DATA='h$(shell cat rom_0.dat);\n\

@@ -31,8 +31,8 @@ module fifo_cts (
 	input clk, input rst,
 	//fifo_ctrl_io fifo_ctrl_if
 	input fifo_en[NTT_STAGE_CNT],
-	output [`MAX_FIFO_ADDR_BITS-1:0] fifo2_addr[NTT_STAGE_CNT],
-	output [`MAX_FIFO_ADDR_BITS-1:0] fifom_addr
+	output [MAX_FIFO_ADDR_BITS-1:0] fifo2_addr[NTT_STAGE_CNT],
+	output [MAX_FIFO_ADDR_BITS-1:0] fifom_addr
 );
 // mul_stage fifo
 localparam int sizem = MUL_STAGE_CNT-1;
@@ -41,7 +41,7 @@ fifo_counter #(.size(sizem)) fifom_ctrl(
 	.addr(fifom_tmp_addr),
 .*);
 if(sizem < 2) assign fifom_addr = '0;
-else assign fifom_addr = `MAX_FIFO_ADDR_BITS'(fifom_tmp_addr);
+else assign fifom_addr = MAX_FIFO_ADDR_BITS'(fifom_tmp_addr);
 
 // fifo2
 // kyber 7 stage as example, HRS in intt=
@@ -57,7 +57,7 @@ for (i=0; i<NTT_STAGE_CNT-1 ; i++) begin
 		.addr(fifo2_tmp_addr),
 	.*);
 	if(size2 < 2) assign fifo2_addr[i] = '0;
-	else assign fifo2_addr[i] = `MAX_FIFO_ADDR_BITS'(fifo2_tmp_addr);
+	else assign fifo2_addr[i] = MAX_FIFO_ADDR_BITS'(fifo2_tmp_addr);
 end
 endgenerate
 endmodule: fifo_cts
@@ -82,7 +82,7 @@ endmodule: fifo_counter
 // used on fifo will delay one more clock for output flipflop
 module dp_ram #(parameter WIDTH, parameter DEPTH)(
 	input clk,
-	input [`MAX_FIFO_ADDR_BITS-1:0] addr,
+	input [MAX_FIFO_ADDR_BITS-1:0] addr,
 	input [WIDTH-1:0] in,
 	output logic[WIDTH-1:0] out
 );
