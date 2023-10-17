@@ -7,7 +7,7 @@ extract() {
 
 # loop by clk
 echo "clk, area" > result.csv
-for clk in $(seq 1.8 0.1 10.0)
+for clk in $(seq 10.0 0.1 10.0)
 do
 	echo "create_clock -period $clk -name clk [get_ports clk]" > clk.sdc
 	make syn

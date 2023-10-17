@@ -5,8 +5,8 @@ SHELL := /bin/bash
 # available ALGORITHM: ALG_CRYSTALS ALG_DIFDIT
 # kyber
 Q = 3329
-NTT_STAGE_CNT = 4
-ALGORITHM = ALG_DIFDIT
+NTT_STAGE_CNT = 7
+ALGORITHM = ALG_CRYSTALS
 
 # dilithium
 #Q = 8380417
@@ -24,8 +24,8 @@ ALGORITHM = ALG_DIFDIT
 #define to use which mo_mul
 #available: "MULTYPE_KRED", "MULTYPE_MWR2MM"
 #default is "MULTYPE_MWR2MM"
-#MO_MUL_TYPE = MULTYPE_KRED
 MO_MUL_TYPE = MULTYPE_KRED
+#MO_MUL_TYPE = MULTYPE_MWR2MM
 
 ##############
 

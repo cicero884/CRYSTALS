@@ -85,10 +85,19 @@ for (genvar i=0; i<WIDTH; i++) begin
 	logic [DATA_WIDTH-1:0] stage_a;
 	assign stage_a = tmp_b[i][i]? tmp_a[i]:'0;
 	MWR2MM_stage mwr2mm_s(.a(stage_a), .in(data[i]), .out(tmp_data[i]));
-	always_ff @(posedge clk) begin
-		data[i+1] <= tmp_data[i];
-		tmp_a[i+1] <= tmp_a[i];
-		tmp_b[i+1] <= tmp_b[i];
+	if(((i+1)%MWR2MM_D) && (i!=(WIDTH-1))) begin
+		always_comb begin
+			data[i+1] = tmp_data[i];
+			tmp_a[i+1] = tmp_a[i];
+			tmp_b[i+1] = tmp_b[i];
+		end
+	end
+	else begin
+		always_ff @(posedge clk) begin
+			data[i+1] <= tmp_data[i];
+			tmp_a[i+1] <= tmp_a[i];
+			tmp_b[i+1] <= tmp_b[i];
+		end
 	end
 end
 endgenerate

@@ -12,16 +12,17 @@ You may need to edit this to read different data input!
 //`include "mo_mul.svh"
 //`include "fifo.svh"
 
-`define TB_PATH "/home/cicero/code/PQC-crystal-kyber/NTT/dat/"
-//`define TB_PATH "/home/cicero/code/kyber/ref"
+//`define TB_PATH "/home/cicero/code/PQC-crystal-kyber/NTT/dat/"
+`define TB_PATH "/home/cicero/code/kyber/ref"
 //`define TB_PATH "/home/ic_contest/509/kyber_test_data/"
 `define NTT
 
-`define CYCLE     4.0
+`define CYCLE     10.0
 `define MAX_CYCLE 14000000
 
-`define DATA_SIZE (1<<NTT_STAGE_CNT)
-
+// for kyber need to separate odd and even
+`define DATA_SIZE (2<<NTT_STAGE_CNT)
+//`define DATA_SIZE (1<<NTT_STAGE_CNT)
 module tb_ntt();
 import ntt_pkg::*;
 
@@ -93,13 +94,15 @@ logic in_en, out_en;
 // the example is from right to left
 
 always_comb begin
+/*
 	in[0] = data_in[`DATA_SIZE/2-1-in_cnt];
 	in[1] = data_in[`DATA_SIZE  -1-in_cnt];
 
 	out_addr[0] = `DATA_SIZE-2-2*out_cnt;
 	out_addr[1] = `DATA_SIZE-1-2*out_cnt;
-	/*
-	separate odd and even(for kyber as tb)
+*/
+
+	//separate odd and even(for kyber as tb)
 	// in[0]: 0 2  4  6  1 3  5  7
 	// in[1]: 8 10 12 14 9 11 13 15
 	if(in_cnt < `DATA_SIZE/4) begin
@@ -121,7 +124,7 @@ always_comb begin
 		out_addr[0] = `DATA_SIZE-4-4*(out_cnt-`DATA_SIZE/4);
 		out_addr[1] = `DATA_SIZE-2-4*(out_cnt-`DATA_SIZE/4);
 	end
-	*/
+
 end
 
 

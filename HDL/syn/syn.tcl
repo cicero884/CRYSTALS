@@ -12,6 +12,7 @@ elaborate ${top}
 #link
 
 # Setting Clock Constraits
+source -echo -verbose clk.sdc
 source -echo -verbose ${sdc_file}
 
 # High fanout threshold
