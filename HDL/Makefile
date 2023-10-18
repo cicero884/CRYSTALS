@@ -11,10 +11,12 @@ ALGORITHM = ALG_CRYSTALS
 # dilithium
 #Q = 8380417
 #NTT_STAGE_CNT = 8
+#ALGORITHM = ALG_CRYSTALS
 
 # new-hope kyber
 #Q = 12289
 #NTT_STAGE_CNT = 9
+#ALGORITHM = ALG_CRYSTALS
 
 # qTESLA
 #Q = 343576577
@@ -26,6 +28,8 @@ ALGORITHM = ALG_CRYSTALS
 #default is "MULTYPE_MWR2MM"
 MO_MUL_TYPE = MULTYPE_KRED
 #MO_MUL_TYPE = MULTYPE_MWR2MM
+
+
 
 ##############
 
@@ -46,6 +50,9 @@ PASS_STR	=	"ALL PASS"
 
 .PHONY: all gtech syn gate nw clean
 default:
+	@echo "-----------------"
+	@echo "remember change 'Q','NTT_STAGE_CNT','ALGORITHM' in Makefile depend on your design!"
+	@echo "-----------------"
 	@echo "mul_test   => Run test for mo_mul.sv"
 	@echo "gtech_ntt  => Run gtech level simulation of ntt"
 	@echo "gtech_intt => Run gtech level simulation of intt(untest)"
@@ -56,6 +63,7 @@ default:
 	@echo "-----------------"
 	@echo "gen_files  => Generate all require file by parameter in Makefile"
 	@echo "gen_rom    => run gen_rom calculate rom values"
+	@echo "-----------------"
 
 all: gtech_ntt syn gate
 

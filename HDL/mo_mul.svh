@@ -10,9 +10,11 @@ change depend on your design of mo_mul
 	parameter MUL_STAGE_CNT=(DATA_WIDTH+1);
 */
 `ifdef MULTYPE_KRED
+	// stage count of a*b
+	parameter KRED_MULCUT=2;
 	// ceil for integer DATA_WIDTH/Q_M
 	parameter KRED_L=(((DATA_WIDTH-1)/Q_M)+1);
-	parameter MUL_STAGE_CNT=(KRED_L+2);
+	parameter MUL_STAGE_CNT=(KRED_L+KRED_MULCUT+1);
 
 `else // MULTYPE_MWR2MM_N
 	parameter int MWR2MM_D=2;

@@ -53,13 +53,24 @@ end
 initial begin
 	if(WIDTH != DATA_WIDTH) $display("error: K_RED only support WIDTH=DATA_WIDTH");
 end
-logic signed [DATA_WIDTH*2:0] c[KRED_L+1];
+logic [DATA_WIDTH-1:0] aR[KRED_MULCUT],bR[KRED_MULCUT];
+logic signed [DATA_WIDTH*2:0] c[KRED_L+1],cR[KRED_MULCUT];
 
 genvar i;
 always_ff @(posedge clk) begin
-	c[0] <= a*b;
+	cR[0] <= a*b;
+	aR[0] <= a;
+	bR[0] <= b;
+end
+for(i=1; i<KRED_MULCUT; i++) begin
+	always_ff @(posedge clk) begin
+		cR[i] <= cR[i-1];
+		aR[i] <= aR[i-1];
+		bR[i] <= bR[i-1];
+	end
 end
 
+assign c[0] = cR[KRED_MULCUT-1];
 generate
 for(i=0; i<KRED_L; i++) begin
 	always_ff @(posedge clk) begin
