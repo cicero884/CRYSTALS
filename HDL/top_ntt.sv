@@ -45,7 +45,7 @@ always_comb begin
 end
 // fifo ctrls
 // you only need one even if you have a lot of ntt or intt
-// fifo_ctrl_io fifo_ctrl_if();
+// fifo_ctrl_io fifo_ctrl_if ();
 fifo_cts u_fifo_cts(.*);
 
 logic [DATA_WIDTH-1:0] ntt_in[2];

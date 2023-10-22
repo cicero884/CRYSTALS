@@ -5,31 +5,27 @@ SHELL := /bin/bash
 # available ALGORITHM: ALG_CRYSTALS ALG_DIFDIT
 # kyber
 Q = 3329
-NTT_STAGE_CNT = 7
-ALGORITHM = ALG_CRYSTALS
+NTT_STAGE_CNT = 8
+ALGORITHM = ALG_DIFDIT
 
 # dilithium
 #Q = 8380417
 #NTT_STAGE_CNT = 8
-#ALGORITHM = ALG_CRYSTALS
 
 # new-hope kyber
 #Q = 12289
 #NTT_STAGE_CNT = 9
-#ALGORITHM = ALG_CRYSTALS
 
 # qTESLA
 #Q = 343576577
 #NTT_STAGE_CNT = 9
-#ALGORITHM = DIFDIT
+#ALGORITHM = ALG_DIFDIT
 
 #define to use which mo_mul
 #available: "MULTYPE_KRED", "MULTYPE_MWR2MM"
 #default is "MULTYPE_MWR2MM"
-MO_MUL_TYPE = MULTYPE_KRED
-#MO_MUL_TYPE = MULTYPE_MWR2MM
-
-
+#MO_MUL_TYPE = MULTYPE_KRED
+MO_MUL_TYPE = MULTYPE_MWR2MM
 
 ##############
 
@@ -50,9 +46,6 @@ PASS_STR	=	"ALL PASS"
 
 .PHONY: all gtech syn gate nw clean
 default:
-	@echo "-----------------"
-	@echo "remember change 'Q','NTT_STAGE_CNT','ALGORITHM' in Makefile depend on your design!"
-	@echo "-----------------"
 	@echo "mul_test   => Run test for mo_mul.sv"
 	@echo "gtech_ntt  => Run gtech level simulation of ntt"
 	@echo "gtech_intt => Run gtech level simulation of intt(untest)"
@@ -63,7 +56,6 @@ default:
 	@echo "-----------------"
 	@echo "gen_files  => Generate all require file by parameter in Makefile"
 	@echo "gen_rom    => run gen_rom calculate rom values"
-	@echo "-----------------"
 
 all: gtech_ntt syn gate
 
@@ -111,6 +103,7 @@ gtech_ntt: gen_files
 		+fsdb+mda \
 		+access+R \
 		+fsdbfile+ntt.fsdb \
+		+define+$(ALGORITHM) \
 		+define+NTT
 
 gtech_intt: gen_files
@@ -121,6 +114,7 @@ gtech_intt: gen_files
 		+fsdbfile+intt.fsdb \
 		-sverilog \
 		-l intt.log \
+		+define+$(ALGORITHM) \
 		+define+INTT
 
 # please use Ctrl+Z , bg , fg instead add & behind command
@@ -156,6 +150,7 @@ gate_ntt:
 		-debug_region+cell +memcbk \
 		+define+SDF \
 		-l gate_ntt.log \
+		+define+$(ALGORITHM) \
 		+define+NTT
 	#-v sim_model.v
 	#	irun $(TB_TOP_FILE) syn/$(TOP)_syn.v -v syn/tsmc13_neg.v \

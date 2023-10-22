@@ -28,7 +28,7 @@ for (i=0; i < NTT_STAGE_CNT-1; i++) begin : stage_loop
 	localparam HRS = 1<<(i);
 	assign fifo_en[i] = en[i]|en[i+1];
 	assign gclk[i] = clk;// & (en[i]|en[i+1]);
-	if((1<<i) < MUL_STAGE_CNT) begin
+	if ((1<<i) < MUL_STAGE_CNT) begin
 		intt_ss #(.STAGE(i)) staged_intt_s (
 			.clk(gclk[i]),
 			.in_en(en[i]), .in(data[i]),
@@ -36,8 +36,7 @@ for (i=0; i < NTT_STAGE_CNT-1; i++) begin : stage_loop
 			.rom_addr(rom_addr[NTT_STAGE_CNT-i-1]), .rom_data(rom_data[NTT_STAGE_CNT-i-1]),
 			.fifo2_addr(fifo2_addr[i]),
 		.*);
-	end
-	else begin
+	end else begin
 		intt_sl #(.STAGE(i)) staged_intt_l (
 			.clk(gclk[i]),
 			.in_en(en[i]), .in(data[i]),
@@ -123,14 +122,13 @@ end
 
 // fifo1
 generate
-if(STAGE == 0) begin
+if (STAGE == 0) begin
 	logic [DATA_WIDTH-1:0] fifo1_tmp;
 	always_ff @(posedge clk) begin
 		fifo1_tmp <= switch_data[1];
 		out[1] <= fifo1_tmp;
 	end
-end
-else begin
+end else begin
 	dp_ram #(.WIDTH(DATA_WIDTH), .DEPTH(HRS)) fifo1(
 		.addr(MAX_FIFO_ADDR_BITS'(ctl_cnt[`INTT_SWITCH_CNT_BITS])),
 		.in(switch_data[1]), .out(out[1]), 
@@ -143,8 +141,7 @@ localparam out_max_cnt = MUL_STAGE_CNT;
 always_ff @(posedge clk,posedge rst) begin
 	if (rst) begin
 		out_en <= '0;
-	end
-	else begin
+	end else begin
 		if (in_en ^ out_en) begin
 			if (ctl_cnt > out_max_cnt) out_en <= in_en;
 		end
@@ -217,8 +214,7 @@ localparam out_max_cnt = HRS;
 always_ff @(posedge clk,posedge rst) begin
 	if (rst) begin
 		out_en <= '0;
-	end
-	else begin
+	end else begin
 		if (ctl_cnt>out_max_cnt) begin
 			out_en <= in_en;
 		end
@@ -260,8 +256,7 @@ always_ff @(posedge clk,posedge rst) begin
 	if (rst) begin
 		out_en <= '0;
 		out_cnt <= '0;
-	end
-	else begin
+	end else begin
 		if (in_en ^ out_en) begin
 			if (out_cnt < out_max_cnt) out_cnt <= out_cnt + 1;
 			else out_en <= in_en;

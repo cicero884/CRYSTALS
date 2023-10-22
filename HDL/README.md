@@ -7,6 +7,8 @@ TRPG later...
 Only NTT currently  
 
 ## Files  
+Before running this project, you should change Q and N and run `make gen_files` to write basic parameters into svh.
+
 
 module hiercracy
 <pre>

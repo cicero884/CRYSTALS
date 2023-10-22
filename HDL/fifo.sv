@@ -40,7 +40,7 @@ logic [$clog2(sizem)-1:0] fifom_tmp_addr;
 fifo_counter #(.size(sizem)) fifom_ctrl(
 	.addr(fifom_tmp_addr),
 .*);
-if(sizem < 2) assign fifom_addr = '0;
+if (sizem < 2) assign fifom_addr = '0;
 else assign fifom_addr = MAX_FIFO_ADDR_BITS'(fifom_tmp_addr);
 
 // fifo2
@@ -56,7 +56,7 @@ for (i=0; i<NTT_STAGE_CNT-1 ; i++) begin
 	fifo_counter #(.size(size2)) fifo2_ctrl(
 		.addr(fifo2_tmp_addr),
 	.*);
-	if(size2 < 2) assign fifo2_addr[i] = '0;
+	if (size2 < 2) assign fifo2_addr[i] = '0;
 	else assign fifo2_addr[i] = MAX_FIFO_ADDR_BITS'(fifo2_tmp_addr);
 end
 endgenerate

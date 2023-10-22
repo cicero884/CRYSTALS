@@ -36,8 +36,8 @@ assign data[0] = '0;
 always_comb begin
 	for (int i=0; i < WIDTH; i++) begin
 		tmp_data[i] = data[i];
-		if(tmp_b[i][i]) tmp_data[i] += tmp_a[i];
-		if(tmp_data[i][0]) tmp_data[i][WIDTH+1:Q_M] -= Q_K;
+		if (tmp_b[i][i]) tmp_data[i] += tmp_a[i];
+		if (tmp_data[i][0]) tmp_data[i][WIDTH+1:Q_M] -= Q_K;
 	end
 end
 always_ff @(posedge clk) begin
@@ -51,7 +51,7 @@ end
 */
 `ifdef MULTYPE_KRED
 initial begin
-	if(WIDTH != DATA_WIDTH) $display("error: K_RED only support WIDTH=DATA_WIDTH");
+	if (WIDTH != DATA_WIDTH) $display("error: K_RED only support WIDTH=DATA_WIDTH");
 end
 logic [DATA_WIDTH-1:0] aR[KRED_MULCUT],bR[KRED_MULCUT];
 logic signed [DATA_WIDTH*2:0] c[KRED_L+1],cR[KRED_MULCUT];
@@ -79,8 +79,8 @@ for(i=0; i<KRED_L; i++) begin
 end
 endgenerate
 always_ff @(posedge clk) begin
-	if(c[KRED_L]>Q) result <= c[KRED_L]-Q;
-	else if(c[KRED_L]<0) result <= c[KRED_L]+Q;
+	if (c[KRED_L]>Q) result <= c[KRED_L]-Q;
+	else if (c[KRED_L]<0) result <= c[KRED_L]+Q;
 	else result <= c[KRED_L];
 end
 `else //default : MWR2MM
@@ -96,14 +96,13 @@ for (genvar i=0; i<WIDTH; i++) begin
 	logic [DATA_WIDTH-1:0] stage_a;
 	assign stage_a = tmp_b[i][i]? tmp_a[i]:'0;
 	MWR2MM_stage mwr2mm_s(.a(stage_a), .in(data[i]), .out(tmp_data[i]));
-	if(((i+1)%MWR2MM_D) && (i!=(WIDTH-1))) begin
+	if (((i+1)%MWR2MM_D) && (i!=(WIDTH-1))) begin
 		always_comb begin
 			data[i+1] = tmp_data[i];
 			tmp_a[i+1] = tmp_a[i];
 			tmp_b[i+1] = tmp_b[i];
 		end
-	end
-	else begin
+	end else begin
 		always_ff @(posedge clk) begin
 			data[i+1] <= tmp_data[i];
 			tmp_a[i+1] <= tmp_a[i];

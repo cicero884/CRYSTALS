@@ -19,7 +19,7 @@ end
 initial begin
 	localparam bit [7:0] asscii_index = "0" + STAGE;
 	localparam fname = {ROM_PATH,"/rom_",asscii_index,".dat"};
-	if(STAGE > 9) begin
+	if (STAGE > 9) begin
 		$display("Error! the STAGE is over one digit, consider fix it in zeta_rom");
 		$finish;
 	end

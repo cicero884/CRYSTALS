@@ -46,8 +46,7 @@ for (i=1; i < NTT_STAGE_CNT; i++) begin
 			.rom_addr(rom_addr[i]), .rom_data(rom_data[i]),
 			.fifo1_addr(fifom_addr), .fifo2_addr(fifo2_addr[i]),
 		.*);
-	end
-	else begin
+	end else begin
 		ntt_ss #(.SWITCH_INDEX(SWITCH_INDEX)) staged_ntt_s (
 			.clk(gclk[i]),
 			.in_en(en[i]), .in(data[i]),
@@ -91,13 +90,12 @@ add_sub #(.isNTT(1)) as_0(
 localparam out_max_cnt = MUL_STAGE_CNT+ADD_SUB_STAGE_CNT-1;
 logic [$clog2(out_max_cnt+1)-1:0] out_cnt;
 always_ff @(posedge clk,posedge rst) begin
-	if(rst) begin
+	if (rst) begin
 		out_en <= '0;
 		out_cnt <= '0;
-	end
-	else begin
-		if(in_en ^ out_en) begin
-			if(out_cnt < out_max_cnt) out_cnt <= out_cnt + 1;
+	end else begin
+		if (in_en ^ out_en) begin
+			if (out_cnt < out_max_cnt) out_cnt <= out_cnt + 1;
 			else out_en <= in_en;
 		end
 		else out_cnt <= '0;
@@ -130,7 +128,7 @@ logic [DATA_WIDTH-1:0] switch_data[2], fifo1_out, mul_result;
 logic switch_bit;
 assign switch_bit = ctl_cnt[SWITCH_INDEX];
 always_ff @(posedge clk) begin
-	if(ctl_cnt[SWITCH_INDEX]) switch_data <= '{fifo1_out, in[1]};
+	if (ctl_cnt[SWITCH_INDEX]) switch_data <= '{fifo1_out, in[1]};
 	else switch_data <= '{in[1], fifo1_out};
 end
 // fifo2
@@ -163,9 +161,9 @@ add_sub #(.isNTT(1)) as_l(
 logic out_en_delay[ADD_SUB_STAGE_CNT+1];
 assign out_en = out_en_delay[ADD_SUB_STAGE_CNT];
 always_ff @(posedge clk, posedge rst) begin
-	if(rst) out_en_delay <= '{default: '0};
+	if (rst) out_en_delay <= '{default: '0};
 	else begin
-		if(!ctl_cnt[SWITCH_INDEX]) begin
+		if (!ctl_cnt[SWITCH_INDEX]) begin
 			out_en_delay[0] <= in_en;
 		end
 		for(int i=0; i<ADD_SUB_STAGE_CNT; ++i) out_en_delay[i+1] <= out_en_delay[i];
@@ -199,7 +197,7 @@ logic [DATA_WIDTH-1:0] switch_data[2], fifo1_out, mul_result;
 logic switch_bit;
 assign switch_bit = ctl_cnt[SWITCH_INDEX];
 always_ff @(posedge clk) begin
-	if(ctl_delay[SWITCH_INDEX]) switch_data <= '{fifo1_out, in1_delay};
+	if (ctl_delay[SWITCH_INDEX]) switch_data <= '{fifo1_out, in1_delay};
 	else switch_data <= '{in1_delay, fifo1_out};
 end
 // mul with zeta
@@ -216,8 +214,7 @@ if (SWITCH_INDEX == 0) begin
 		fifo1_tmp <= in[0];
 		fifo1_out <= fifo1_tmp;
 	end
-end
-else begin
+end else begin
 	dp_ram #(.WIDTH(DATA_WIDTH), .DEPTH(`HRS)) fifo1(
 		.addr(MAX_FIFO_ADDR_BITS'(ctl_cnt[`NTT_SWITCH_CNT_BITS])),
 		.in(in[0]), .out(fifo1_out), 
@@ -241,12 +238,11 @@ add_sub #(.isNTT(1)) as_s(
 .*);
 // out_en
 always_ff @(posedge clk,posedge rst) begin
-	if(rst) begin
+	if (rst) begin
 		out_en <= '0;
-	end
-	else begin
-		if(in_en ^ out_en) begin
-			if(signed'(ctl_cnt) < -out_max_cnt) out_en <= in_en;
+	end else begin
+		if (in_en ^ out_en) begin
+			if (signed'(ctl_cnt) < -out_max_cnt) out_en <= in_en;
 		end
 	end
 end
