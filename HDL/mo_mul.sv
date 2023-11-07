@@ -9,7 +9,6 @@ TODO: optmize final stage to FA & HA(MWR2MM_N)
 input: a,b (RANGE:unsigned 0~Q)
 output: result = a*b*2^^(WIDTH) %Q (RANGE: 0~Q or 0~2^^(WIDTH)-1, depend on a)
 ************/
-`include "ntt_macro.svh"
 import ntt_pkg::*;
 typedef struct{
 	logic [DATA_WIDTH-1:0]ss;

@@ -12,10 +12,6 @@ ALGORITHM = ALG_DIFDIT
 #Q = 8380417
 #NTT_STAGE_CNT = 8
 
-# new-hope kyber
-#Q = 12289
-#NTT_STAGE_CNT = 9
-
 # FALCON
 #Q = 12289
 #NTT_STAGE_CNT = 9
@@ -30,7 +26,8 @@ ALGORITHM = ALG_DIFDIT
 #available: "MULTYPE_KRED", "MULTYPE_MWR2MM"
 #default is "MULTYPE_MWR2MM"
 #MO_MUL_TYPE = MULTYPE_KRED
-MO_MUL_TYPE = MULTYPE_MWR2MM
+#MO_MUL_TYPE = MULTYPE_MWR2MM
+MO_MUL_TYPE = MULTYPE_GMWR2MM
 
 ##############
 
@@ -91,8 +88,8 @@ gen_files: gen_rom
 		> rom.svh;
 	@echo "all file generated!"
 
-mul_test:
-	vcs -R $(TB_MUL_TOP_FILE) $(MUL_TOP_FILE) \
+mul_test: gen_files
+	vcs -R $(PKG_FILE) $(TB_MUL_TOP_FILE) $(MUL_TOP_FILE) \
 		+vcs+fsdbon \
 		+fsdb+mda \
 		+fsdbfile+mul.fsdb \
