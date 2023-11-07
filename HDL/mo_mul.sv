@@ -114,7 +114,7 @@ end
 endgenerate
 local parameter Q_R = DATA_WIDTH-Q_M*GMWR2MM_L;
 logic [DATA_WIDTH:0] last_c;
-assign last_c = $signed(c[GMWR2MM_L][2*DATA_WIDTH-GMWR2MM_L*Q_M:Q_R])-((c[GMWR2MM_L][Q_R-1:0]*Q_K)<<(Q_M-Q_R));
+assign last_c = $signed(c[GMWR2MM_L][2*DATA_WIDTH-GMWR2MM_L*Q_M:Q_R]) - ((Q_R)? ((c[GMWR2MM_L][Q_R-1:0]*Q_K)<<(Q_M-Q_R)) : 0);
 always_ff @(posedge clk) begin
 	if (last_c<0) result <= last_c+Q;
 	else result <= last_c;
