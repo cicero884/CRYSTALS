@@ -51,7 +51,7 @@ end
 */
 `ifdef MULTYPE_KRED
 initial begin
-	if (WIDTH != DATA_WIDTH) $display("error: K_RED only support WIDTH=DATA_WIDTH");
+	if (WIDTH != DATA_WIDTH) $display("error: Current K_RED only support WIDTH=DATA_WIDTH");
 end
 logic [DATA_WIDTH-1:0] aR[KRED_MULCUT],bR[KRED_MULCUT];
 logic signed [DATA_WIDTH*2:0] c[KRED_L+1],cR[KRED_MULCUT];
@@ -83,7 +83,44 @@ always_ff @(posedge clk) begin
 	else if (c[KRED_L]<0) result <= c[KRED_L]+Q;
 	else result <= c[KRED_L];
 end
-`else //default : MWR2MM
+`elsif MULTYPE_GMWR2MM
+initial begin
+	if (WIDTH != DATA_WIDTH) $display("error: Current K_RED only support WIDTH=DATA_WIDTH");
+end
+logic [DATA_WIDTH-1:0] aR[KRED_MULCUT],bR[KRED_MULCUT];
+logic signed [DATA_WIDTH*2:0] c[KRED_L+1],cR[KRED_MULCUT];
+
+genvar i;
+always_ff @(posedge clk) begin
+	cR[0] <= a*b;
+	aR[0] <= a;
+	bR[0] <= b;
+end
+for(i=1; i<GMWR2MM_MULCUT; i++) begin
+	always_ff @(posedge clk) begin
+		cR[i] <= cR[i-1];
+		aR[i] <= aR[i-1];
+		bR[i] <= bR[i-1];
+	end
+end
+
+assign c[0] = cR[KRED_MULCUT-1];
+generate
+for(i=0; i<GMWR2MM_L; i++) begin
+	always_ff @(posedge clk) begin
+		c[i+1] <= $signed(c[i][2*DATA_WIDTH-i*Q_M:Q_M])-DATA_WIDTH'(c[i][Q_M-1:0])*Q_K;
+	end
+end
+endgenerate
+local parameter Q_R = DATA_WIDTH-Q_M*GMWR2MM_L;
+logic [DATA_WIDTH:0] last_c;
+assign last_c = $signed(c[GMWR2MM_L][2*DATA_WIDTH-GMWR2MM_L*Q_M:Q_R])-((c[GMWR2MM_L][Q_R-1:0]*Q_K)<<(Q_M-Q_R));
+always_ff @(posedge clk) begin
+	if (last_c<0) result <= last_c+Q;
+	else result <= last_c;
+end
+
+`else //default : MULTYPE_MWR2MM
 logic [WIDTH-1:0] tmp_b[WIDTH+1];
 logic [DATA_WIDTH-1:0] tmp_a[WIDTH+1];
 assign tmp_a[0] = a;

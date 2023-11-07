@@ -15,8 +15,12 @@ change depend on your design of mo_mul
 	// ceil for integer DATA_WIDTH/Q_M
 	parameter KRED_L=(((DATA_WIDTH-1)/Q_M)+1);
 	parameter MUL_STAGE_CNT=(KRED_L+KRED_MULCUT+1);
+`ifdef MULTYPE_GMWR2MM
+	parameter GMWR2MM_MULCUT=2;
+	parameter GMWR2MM_L=DATA_WIDTH/Q_M;
+	parameter MUL_STAGE_CNT=(GMWR2MM_L+GMWR2MM_MULCUT+1);
 
-`else // MULTYPE_MWR2MM_N
+`else // MULTYPE_MWR2MM
 	parameter int MWR2MM_D=2;
 	parameter MUL_STAGE_CNT=(((DATA_WIDTH-1)/MWR2MM_D)+1+2);
 `endif
