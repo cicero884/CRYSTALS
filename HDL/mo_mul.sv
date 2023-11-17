@@ -9,6 +9,7 @@ TODO: optmize final stage to FA & HA(MWR2MM_N)
 input: a,b (RANGE:unsigned 0~Q)
 output: result = a*b*2^^(WIDTH) %Q (RANGE: 0~Q or 0~2^^(WIDTH)-1, depend on a)
 ************/
+`include "ntt_macro.svh"
 import ntt_pkg::*;
 typedef struct{
 	logic [DATA_WIDTH-1:0]ss;
@@ -86,8 +87,8 @@ end
 initial begin
 	if (WIDTH != DATA_WIDTH) $display("error: Current K_RED only support WIDTH=DATA_WIDTH");
 end
-logic [DATA_WIDTH-1:0] aR[KRED_MULCUT],bR[KRED_MULCUT];
-logic signed [DATA_WIDTH*2:0] c[KRED_L+1],cR[KRED_MULCUT];
+logic [DATA_WIDTH-1:0] aR[GMWR2MM_MULCUT],bR[GMWR2MM_MULCUT];
+logic signed [DATA_WIDTH*2:0] c[GMWR2MM_L+1],cR[GMWR2MM_MULCUT];
 
 genvar i;
 always_ff @(posedge clk) begin
@@ -103,7 +104,7 @@ for(i=1; i<GMWR2MM_MULCUT; i++) begin
 	end
 end
 
-assign c[0] = cR[KRED_MULCUT-1];
+assign c[0] = cR[GMWR2MM_MULCUT-1];
 generate
 for(i=0; i<GMWR2MM_L; i++) begin
 	always_ff @(posedge clk) begin
@@ -111,8 +112,8 @@ for(i=0; i<GMWR2MM_L; i++) begin
 	end
 end
 endgenerate
-local parameter Q_R = DATA_WIDTH-Q_M*GMWR2MM_L;
-logic [DATA_WIDTH:0] last_c;
+parameter Q_R = DATA_WIDTH-Q_M*GMWR2MM_L;
+logic signed [DATA_WIDTH:0] last_c;
 assign last_c = $signed(c[GMWR2MM_L][2*DATA_WIDTH-GMWR2MM_L*Q_M:Q_R]) - ((Q_R)? ((c[GMWR2MM_L][Q_R-1:0]*Q_K)<<(Q_M-Q_R)) : 0);
 always_ff @(posedge clk) begin
 	if (last_c<0) result <= last_c+Q;

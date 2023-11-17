@@ -28,8 +28,9 @@ check_design
 
 #-gate_clock
 # Synthesize (ultimate)
-compile_ultra -no_autoungroup -no_boundary_optimization -retime 
-compile_ultra -incremental
+compile_ultra
+optimize_registers
+compile_ultra -incremental -retime
 
 current_design [get_designs ${top}]
 
@@ -51,3 +52,5 @@ write_file -format verilog -hierarchy -output ./syn/${top}_syn.v
 report_area > area.log
 report_timing > timing.log
 report_qor > ${top}_qor.log
+
+exit

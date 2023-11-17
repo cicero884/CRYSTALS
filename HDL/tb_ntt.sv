@@ -6,18 +6,18 @@ define NTT,PWM,INTT to test what function you want to test
 You may need to edit this to read different data input!
 ***********/
 //`define TB_PATH "/home/cicero/code/PQC-crystal-kyber/NTT/dat/"
-//`define TB_PATH "/home/cicero/code/kyber/ref"
+`define TB_PATH "/home/cicero/code/kyber/ref"
 //`define TB_PATH "/home/ic_contest/509/kyber_test_data/"
 //`define TB_PATH "/home/ic_contest/509/NTT/dat/sample256/"
 //`define TB_PATH "/home/ic_contest/509/NTT/dat/"
-`define TB_PATH "/home/ic_contest/509/CRYSTALS/HDL/testdata/"
+//`define TB_PATH "/home/ic_contest/509/CRYSTALS/HDL/testdata/"
 // test which module
 `define NTT 
 // for kyber extracted testdata require separate odd and even
-//`define SEPARATE_ODD_EVEN
+`define SEPARATE_ODD_EVEN
 
 
-`define CYCLE     10.0
+`define CYCLE     8.0
 `define MAX_CYCLE 14000000
 
 `ifdef SDF 
@@ -144,18 +144,6 @@ top_ntt u_top_ntt(
 	.pwm_out_en(en_ignore[1]), .pwm_out1(data_ignore[1][0]),.pwm_out2(data_ignore[1][1]),
 .*);
 
-
-// for post sim in vivodo =_=
-/*
-top_ntt u_top_ntt(
-	.ntt_in_en(in_en), .\ntt_in[0] (in[0]), .\ntt_in[1] (in[1]),
-	.ntt_out_en(out_en), .\ntt_out[0] (out[0]), .\ntt_out[1] (out[1]),
-	.intt_in_en('0), .\intt_in[0] (in[0]), .\intt_in[1] (in[1]),
-	.intt_out_en(en_ignore[0]), .\intt_out[0] (data_ignore[0][0]),.\intt_out[1] (data_ignore[0][1]),
-	.pwm_in_en('0), .\pwm_in[0][0] (in[0]), .\pwm_in[0][1] (in[1]),.\pwm_in[1][0] (in2[0]), .\pwm_in[1][1] (in2[1]),
-	.pwm_out_en(en_ignore[1]), .\pwm_out[0] (data_ignore[1][0]), .\pwm_out[1] (data_ignore[1][1]),
-.*);
-*/
 
 `elsif PWM
 always_comb begin

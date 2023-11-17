@@ -52,7 +52,7 @@ int main(int argc,char *argv[]){
 	// calculate bias for different mul
 	long long unsigned data_max = MSB_2(Q);
 	if(argc>4){
-		if(!strcmp(argv[4],"MULTYPE_MWR2MM")){
+		if((!strcmp(argv[4],"MULTYPE_MWR2MM"))||(!strcmp(argv[4],"MULTYPE_GMWR2MM"))){
 			bias = data_max%Q;
 		}
 		else if(!strcmp(argv[4],"MULTYPE_KRED")){
