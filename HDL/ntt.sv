@@ -67,6 +67,19 @@ module ntt_s0(
 	output logic out_en,output [DATA_WIDTH-1:0] out[2],
 	input [MAX_FIFO_ADDR_BITS-1:0] fifo1_addr
 );
+/*
+add_sub #(.isNTT(1)) as_0(
+	.in(in),
+	.out(out),
+.*);
+logic en[NTT_ADD_SUB_STAGE_CNT];
+assign en[0] = in_en;
+always_ff @(posedge clk) begin
+	for(int i=1;i<NTT_ADD_SUB_STAGE_CNT;i++) en[i] <= en[i-1];
+	out_en <= en[NTT_ADD_SUB_STAGE_CNT-1];
+end
+*/
+
 logic [DATA_WIDTH-1:0] fifo1_out, mul_result;
 dp_ram #(.WIDTH(DATA_WIDTH), .DEPTH(MUL_STAGE_CNT-1)) s0_fifo(
 	.addr(fifo1_addr),
@@ -74,7 +87,7 @@ dp_ram #(.WIDTH(DATA_WIDTH), .DEPTH(MUL_STAGE_CNT-1)) s0_fifo(
 .*);
 
 assign rom_addr = '0;
-mo_mul s0_mul(
+`MO_MUL s0_mul(
 	.a(rom_data), .b(in[1]),
 	.result(mul_result),
 .*);
@@ -87,7 +100,7 @@ add_sub #(.isNTT(1)) as_0(
 .*);
 
 // counter for out_en
-localparam out_max_cnt = MUL_STAGE_CNT+ADD_SUB_STAGE_CNT-1;
+localparam out_max_cnt = MUL_STAGE_CNT+NTT_ADD_SUB_STAGE_CNT-1;
 logic [$clog2(out_max_cnt+1)-1:0] out_cnt;
 always_ff @(posedge clk,posedge rst) begin
 	if (rst) begin
@@ -101,6 +114,7 @@ always_ff @(posedge clk,posedge rst) begin
 		else out_cnt <= '0;
 	end
 end
+
 endmodule: ntt_s0
 
 `define NTT_SWITCH_CNT_BITS SWITCH_INDEX-1:0
@@ -143,8 +157,8 @@ dp_ram #(.WIDTH(DATA_WIDTH), .DEPTH(MUL_STAGE_CNT-1)) fifo1(
 	.addr(fifo1_addr),
 	.in(fifo2_out[0]), .out(fifo1_out), 
 .*);
-// mul with zeta
-mo_mul si_mul(
+// mul with tf
+`MO_MUL si_mul(
 	.a(rom_data), .b(switch_data[1]),
 	.result(mul_result),
 .*);
@@ -158,15 +172,15 @@ add_sub #(.isNTT(1)) as_l(
 .*);
 
 // out_en
-logic out_en_delay[ADD_SUB_STAGE_CNT+1];
-assign out_en = out_en_delay[ADD_SUB_STAGE_CNT];
+logic out_en_delay[NTT_ADD_SUB_STAGE_CNT+1];
+assign out_en = out_en_delay[NTT_ADD_SUB_STAGE_CNT];
 always_ff @(posedge clk, posedge rst) begin
 	if (rst) out_en_delay <= '{default: '0};
 	else begin
 		if (!ctl_cnt[SWITCH_INDEX]) begin
 			out_en_delay[0] <= in_en;
 		end
-		for(int i=0; i<ADD_SUB_STAGE_CNT; ++i) out_en_delay[i+1] <= out_en_delay[i];
+		for(int i=0; i<NTT_ADD_SUB_STAGE_CNT; ++i) out_en_delay[i+1] <= out_en_delay[i];
 	end
 end
 endmodule: ntt_sl
@@ -180,7 +194,7 @@ module ntt_ss #(parameter SWITCH_INDEX)(
 	output logic [NTT_STAGE_CNT-2:0] rom_addr,input [DATA_WIDTH-1:0] rom_data,
 	input [MAX_FIFO_ADDR_BITS-1:0] fifo2_addr
 );
-localparam out_max_cnt = MUL_STAGE_CNT+ADD_SUB_STAGE_CNT+1;
+localparam out_max_cnt = MUL_STAGE_CNT+NTT_ADD_SUB_STAGE_CNT+1;
 logic [max(NTT_STAGE_CNT-2,$clog2(out_max_cnt)):0] ctl_cnt, ctl_delay;
 logic [DATA_WIDTH-1:0] in1_delay;
 //logic switch_delay;
@@ -200,8 +214,8 @@ always_ff @(posedge clk) begin
 	if (ctl_delay[SWITCH_INDEX]) switch_data <= '{fifo1_out, in1_delay};
 	else switch_data <= '{in1_delay, fifo1_out};
 end
-// mul with zeta
-mo_mul si_mul(
+// mul with tf
+`MO_MUL si_mul(
 	.a(rom_data), .b(switch_data[1]),
 	.result(mul_result),
 .*);
@@ -252,7 +266,7 @@ endmodule: ntt_ss
 /*
 `ifdef CLK_GATING
 assign m_en  = (out_en&in_en)|((in_en^out_en)&(out_cnt>=0));
-assign as_en = (out_en&in_en)|((in_en^out_en)&(out_cnt>=(out_max_cnt-ADD_SUB_STAGE_CNT)));
+assign as_en = (out_en&in_en)|((in_en^out_en)&(out_cnt>=(out_max_cnt-NTT_ADD_SUB_STAGE_CNT)));
 `else
 `endif
 */

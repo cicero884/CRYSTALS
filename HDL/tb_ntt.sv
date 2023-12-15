@@ -31,6 +31,7 @@ You may need to edit this to read different data input!
 	`define DATA_SIZE (1<<NTT_STAGE_CNT)
 `endif
 
+`include "tool.svh"
 import ntt_pkg::*;
 module tb_ntt();
 
@@ -52,6 +53,7 @@ integer fd_in, fd_out;
 int fd_in2;
 initial begin
 	rst = '0;
+	$display("\n\nMUL_TYPE = %s MUL_STAGE = %d \n ",`STRINGIFY(`MO_MUL),MUL_STAGE_CNT);
 
 `ifdef NTT
 	fd_in = $fopen({`TB_PATH,"/ntt_in.dat"},"r");
@@ -338,3 +340,4 @@ always_ff @(posedge clk, posedge rst) begin
 end
 
 endmodule
+

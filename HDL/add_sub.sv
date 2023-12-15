@@ -29,11 +29,13 @@ generate
 if (isNTT) begin
 	logic [DATA_WIDTH:0] add;
 	logic signed [DATA_WIDTH:0] sub;
-	always_ff @(posedge clk) begin
-		add <= in[0]+in[1];
-		sub <= signed'({1'b0,in[0]})-signed'({1'b0,in[1]});
+	always_comb begin
+		add = in[0]+in[1];
+		sub = signed'({1'b0,in[0]})-signed'({1'b0,in[1]});
+	end
 
-		// reduce width
+	// reduce data range to 0~2^t
+	always_ff @(posedge clk) begin
 		out[0] <= (add[DATA_WIDTH])? add-Q :add;
 		out[1] <= (sub[DATA_WIDTH])? unsigned'(sub+Q) :unsigned'(sub);
 	end

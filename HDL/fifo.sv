@@ -24,8 +24,7 @@ if (WIDTH < 256) begin
 	.error(error_inst),   .data_out(data_out_inst) );
 end
 */
-//`define ABS(a,b) ((a>b)? a-b:b-a)
-//`define MAX(a,b) ()
+`include "ntt_macro.svh"
 import ntt_pkg::*;
 module fifo_cts (
 	input clk, input rst,

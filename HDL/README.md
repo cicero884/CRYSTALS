@@ -19,7 +19,7 @@ tb_ntt
 └────top_ntt
      ├────fifo_cts
      │    └────fifo_counter
-     ├────zeta_rom
+     ├────gen_tf_rom
      │    └────duel_rom
      ├────ntt
      │    ├────ntt_s0
@@ -87,11 +87,11 @@ invert ntt
 	intt_sl: intt stage when reorder delay larger than mul stage count
 	intt_sf: intt stage when final stage, no reorder inside
 </pre>
-### mo_mul.sv
+### mo\_mul.sv
 modular multiplication  
 If you change this design and have different number of pipeline stage  
 Remember to change mo\_mul.svh  
-if you change the way of multiplication, remember change tb\_mul to test correctly and change zeta2rom.c to make sure you generate correct zeta2rom.c  
+if you change the way of multiplication, remember change tb\_mul to test correctly and change gen\_tf\_rom.c to make sure you generate correct twiddle factor rom  
 ### ntt.sv
 <pre>
 ntt
@@ -99,27 +99,27 @@ ntt
 	ntt_ss: ntt stage when reorder delay smaller than mul stage count
 	ntt_sl: ntt stage when reorder delay larger than mul stage count
 </pre>
-### tb_ntt:
+### tb\_ntt:
 testbench for ntt and intt
 pwm unfinish .w.
 
-### tb_mul
+### tb\_mul
 testbench for mo_mul
 
-### tb_ntt
+### tb\_ntt
 testbench for ntt  
 if your test data is not kyber, remember to modify your order.  
-### top_ntt.sv:  
+### top\_ntt.sv:  
 An example of using this ntt.  
 For NTT to work, Require fifo\_cts & duel\_rom connect to ntt or intt,  
 Only need one fifo\_cts. 
-### zeta_rom.sv:
-duel port rom store zeta values.
-### zeta2rom.c
-convert zetas to required data files for rom to read  
+### tf\_rom.sv:
+duel port rom store tf values.
+### gen_tf_rom.c
+calculate twiddle factor to required data files for rom to read  
 input : argv1=log2(poly size), argv2=prine, argv3=root_of_unit(optional)  
-ex1: `zeta2rom 7 3329`  
-ex2: `zeta2rom 7 3329 17`  
+ex1: `gen_tf_rom 7 3329`  
+ex2: `gen_tf_rom 7 3329 17`  
 (for kyber is 7,3329,17 since the odd and even is separate)   
 (https://www.ietf.org/archive/id/draft-cfrg-schwabe-kyber-01.html)  
 output : multiple .dat files for rom to read  

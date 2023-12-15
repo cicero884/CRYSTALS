@@ -1,5 +1,5 @@
 /************
-zeta_rom
+tf_rom
 *************/
 import ntt_pkg::*;
 module duel_rom #(parameter STAGE)(
@@ -12,15 +12,15 @@ logic [DATA_WIDTH-1:0] rom[(1<<STAGE)];
 `ifdef FAKE_ROM // temperary test for asic without memory generator
 `include "fake_rom.svh"
 always_ff @(posedge clk) begin
-	data[0] <= zeta_rom_array[(1<<STAGE)+addr[0][STAGE-1:0]];
-	data[1] <= zeta_rom_array[(1<<STAGE)+addr[1][STAGE-1:0]];
+	data[0] <= tf_rom_array[(1<<STAGE)+addr[0][STAGE-1:0]];
+	data[1] <= tf_rom_array[(1<<STAGE)+addr[1][STAGE-1:0]];
 end
 `else // work in ISE, for asic you should use memory generator
 initial begin
 	localparam bit [7:0] asscii_index = "0" + STAGE;
 	localparam fname = {ROM_PATH,"/rom_",asscii_index,".dat"};
 	if (STAGE > 9) begin
-		$display("Error! the STAGE is over one digit, consider fix it in zeta_rom");
+		$display("Error! the STAGE is over one digit, consider fix it in tf_rom");
 		$finish;
 	end
 	$readmemh(fname, rom, 0, (1<<STAGE)-1);
@@ -34,7 +34,7 @@ end
 endmodule
 
 
-module zeta_rom(
+module tf_rom(
 	input clk,
 	input [NTT_STAGE_CNT-2:0] rom_addr[2][NTT_STAGE_CNT],
 	output logic [DATA_WIDTH-1:0]rom_data[2][NTT_STAGE_CNT]
@@ -60,7 +60,7 @@ for (i=1; i < NTT_STAGE_CNT; i++) begin
 	assign tmp_rom_addr = '{rom_addr[0][i],rom_addr[1][i]};
 	assign rom_data[0][i] = tmp_rom_data[0];
 	assign rom_data[1][i] = tmp_rom_data[0];
-	duel_rom #(i) zeta_splited(
+	duel_rom #(i) tf_splited(
 		.addr(tmp_rom_addr),
 		.data(tmp_rom_data),
 	.*);

@@ -77,25 +77,25 @@ add_sub #(.isNTT(0)) as_i(
 	.in(in),
 	.out(add_sub_out),
 .*);
-logic in_en_delay[ADD_SUB_STAGE_CNT];
+logic in_en_delay[INTT_ADD_SUB_STAGE_CNT];
 assign in_en_delay[0] = in_en;
 always_ff @(posedge clk) begin
-	for(int i=1; i < ADD_SUB_STAGE_CNT; i++) in_en_delay[i] <= in_en_delay[i-1];
+	for(int i=1; i < INTT_ADD_SUB_STAGE_CNT; i++) in_en_delay[i] <= in_en_delay[i-1];
 end
 
 // counter for control switch & rom
-// prev clock for zeta read
+// prev clock for tf read
 logic [NTT_STAGE_CNT-2:0] ctl_cnt;
 always_ff @(posedge clk) begin
-	if (in_en_delay[ADD_SUB_STAGE_CNT-1]|out_en) ctl_cnt <= ctl_cnt+1;
+	if (in_en_delay[INTT_ADD_SUB_STAGE_CNT-1]|out_en) ctl_cnt <= ctl_cnt+1;
 	else ctl_cnt <= '0;
 end
 
 assign rom_addr = ctl_cnt[`INTT_ROM_BITS];
 logic switch_bit;
 logic [STAGE:0] switch_cnt;
-// mul with zeta
-mo_mul si_mul(
+// mul with tf
+`MO_MUL si_mul(
 	.a(rom_data), .b(add_sub_out[1]),
 	.result(mul_result),
 .*);
@@ -163,27 +163,27 @@ add_sub #(.isNTT(0)) as_i(
 	.in(in),
 	.out(add_sub_out),
 .*);
-logic in_en_delay[ADD_SUB_STAGE_CNT];
+logic in_en_delay[INTT_ADD_SUB_STAGE_CNT];
 assign in_en_delay[0] = in_en;
 always_ff @(posedge clk) begin
-	for(int i=1; i < ADD_SUB_STAGE_CNT; i++) in_en_delay[i] <= in_en_delay[i-1];
+	for(int i=1; i < INTT_ADD_SUB_STAGE_CNT; i++) in_en_delay[i] <= in_en_delay[i-1];
 end
 
 // counter for control switch & rom
-// prev clock for zeta read
+// prev clock for tf read
 logic [NTT_STAGE_CNT-2:0] ctl_cnt;
 `define INTT_SWITCH_CNT_BITS STAGE-1:0
 `define INTT_ROM_BITS NTT_STAGE_CNT-2:STAGE
 always_ff @(posedge clk) begin
-	if (in_en_delay[ADD_SUB_STAGE_CNT-1]|out_en) ctl_cnt <= ctl_cnt+1;
+	if (in_en_delay[INTT_ADD_SUB_STAGE_CNT-1]|out_en) ctl_cnt <= ctl_cnt+1;
 	else ctl_cnt <= '0;
 end
 
 assign rom_addr = ctl_cnt[`INTT_ROM_BITS];
 logic switch_bit;
 logic [STAGE:0] switch_cnt;
-// mul with zeta
-mo_mul si_mul(
+// mul with tf
+`MO_MUL si_mul(
 	.a(rom_data), .b(add_sub_out[1]),
 	.result(mul_result),
 .*);
@@ -237,20 +237,20 @@ add_sub #(.isNTT(0)) as_0(
 	.out(add_sub_out),
 .*);
 
-// delay with mo_mul
+// delay with `MO_MUL
 dp_ram #(.WIDTH(DATA_WIDTH), .DEPTH(MUL_STAGE_CNT-1)) s0_fifo(
 	.addr(fifo1_addr),
 	.in(add_sub_out[0]), .out(out[0]), 
 .*);
 
-// mul with zeta
+// mul with tf
 assign rom_addr = '0;
-mo_mul s0_mul(
+`MO_MUL s0_mul(
 	.a(rom_data), .b(add_sub_out[1]),
 	.result(out[1]),
 .*);
 // counter for out_en
-localparam out_max_cnt = MUL_STAGE_CNT+ADD_SUB_STAGE_CNT-1;
+localparam out_max_cnt = MUL_STAGE_CNT+INTT_ADD_SUB_STAGE_CNT-1;
 logic [$clog2(out_max_cnt+1)-1:0] out_cnt;
 always_ff @(posedge clk,posedge rst) begin
 	if (rst) begin
@@ -270,7 +270,7 @@ endmodule: intt_sf
 /*
 `ifdef CLK_GATING
 assign m_en  = (out_en&in_en)|((in_en^out_en)&(out_cnt>=0));
-assign as_en = (out_en&in_en)|((in_en^out_en)&(out_cnt>=(out_max_cnt-ADD_SUB_STAGE_CNT)));
+assign as_en = (out_en&in_en)|((in_en^out_en)&(out_cnt>=(out_max_cnt-INTT_ADD_SUB_STAGE_CNT)));
 `else
 `endif
 */

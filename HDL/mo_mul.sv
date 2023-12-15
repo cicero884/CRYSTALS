@@ -1,55 +1,20 @@
 /************
 modular multiplication
-use modified MWR2MM
-switch a and b in this design will change range of output
-it's better to let a<Q
-
-TODO: optmize final stage to FA & HA(MWR2MM_N)
-
 input: a,b (RANGE:unsigned 0~Q)
-output: result = a*b*2^^(WIDTH) %Q (RANGE: 0~Q or 0~2^^(WIDTH)-1, depend on a)
+output: result = a*b*? %Q (? depend on algorithm)
 ************/
 `include "ntt_macro.svh"
 import ntt_pkg::*;
-typedef struct{
-	logic [DATA_WIDTH-1:0]ss;
-	logic [DATA_WIDTH-1:Q_M]snc;
-	logic [Q_M-1:0] sc;
-} mwr2mm_s;
 
-module mo_mul #(parameter WIDTH=DATA_WIDTH)(
+/*****
+KRED
+output: a*b*(k^^l)
+*****/
+module KRED #(parameter WIDTH=DATA_WIDTH)(
 	input clk,
 	input [DATA_WIDTH-1:0] a, input [WIDTH-1:0] b,
 	output logic [DATA_WIDTH-1:0] result
 );
-
-/*old MWR2MM
-logic [WIDTH-1:0] tmp_b[WIDTH+1];
-logic [DATA_WIDTH-1:0] tmp_a[WIDTH+1];
-assign tmp_a[0] = a;
-assign tmp_b[0] = b;
-
-logic signed [DATA_WIDTH:0] data[WIDTH+1];
-logic signed [DATA_WIDTH+1:0] tmp_data[WIDTH];
-assign data[0] = '0;
-
-always_comb begin
-	for (int i=0; i < WIDTH; i++) begin
-		tmp_data[i] = data[i];
-		if (tmp_b[i][i]) tmp_data[i] += tmp_a[i];
-		if (tmp_data[i][0]) tmp_data[i][WIDTH+1:Q_M] -= Q_K;
-	end
-end
-always_ff @(posedge clk) begin
-	for (int i=0; i < WIDTH; i++) begin
-		data[i+1] <= tmp_data[i]>>1;
-		tmp_a[i+1] <= tmp_a[i];
-		tmp_b[i+1] <= tmp_b[i];
-	end
-	result <= (data[WIDTH][DATA_WIDTH])? DATA_WIDTH'(data[WIDTH]+Q) : DATA_WIDTH'(data[WIDTH]);
-end
-*/
-`ifdef MULTYPE_KRED
 initial begin
 	if (WIDTH != DATA_WIDTH) $display("error: Current K_RED only support WIDTH=DATA_WIDTH");
 end
@@ -83,12 +48,23 @@ always_ff @(posedge clk) begin
 	else if (c[KRED_L]<0) result <= c[KRED_L]+Q;
 	else result <= c[KRED_L];
 end
-`elsif MULTYPE_GMWR2MM
+endmodule
+
+/*****
+KLMM
+output: a*b*2^^(-t)
+*****/
+
+module KLMM #(parameter WIDTH=DATA_WIDTH)(
+	input clk,
+	input [DATA_WIDTH-1:0] a, input [WIDTH-1:0] b,
+	output logic [DATA_WIDTH-1:0] result
+);
 initial begin
-	if (WIDTH != DATA_WIDTH) $display("error: Current K_RED only support WIDTH=DATA_WIDTH");
+	if (WIDTH != DATA_WIDTH) $display("error: Current KLMM only support WIDTH=DATA_WIDTH");
 end
-logic [DATA_WIDTH-1:0] aR[GMWR2MM_MULCUT],bR[GMWR2MM_MULCUT];
-logic signed [DATA_WIDTH*2:0] c[GMWR2MM_L+1],cR[GMWR2MM_MULCUT];
+logic [DATA_WIDTH-1:0] aR[KLMM_MULCUT],bR[KLMM_MULCUT];
+logic signed [DATA_WIDTH*2:0] c[KLMM_L+1],cR[KLMM_MULCUT];
 
 genvar i;
 always_ff @(posedge clk) begin
@@ -96,7 +72,7 @@ always_ff @(posedge clk) begin
 	aR[0] <= a;
 	bR[0] <= b;
 end
-for(i=1; i<GMWR2MM_MULCUT; i++) begin
+for(i=1; i<KLMM_MULCUT; i++) begin
 	always_ff @(posedge clk) begin
 		cR[i] <= cR[i-1];
 		aR[i] <= aR[i-1];
@@ -104,23 +80,68 @@ for(i=1; i<GMWR2MM_MULCUT; i++) begin
 	end
 end
 
-assign c[0] = cR[GMWR2MM_MULCUT-1];
+assign c[0] = cR[KLMM_MULCUT-1];
 generate
-for(i=0; i<GMWR2MM_L; i++) begin
+for(i=0; i<KLMM_L; i++) begin
 	always_ff @(posedge clk) begin
 		c[i+1] <= $signed(c[i][2*DATA_WIDTH-i*Q_M:Q_M])-DATA_WIDTH'(c[i][Q_M-1:0])*Q_K;
 	end
 end
 endgenerate
-parameter Q_R = DATA_WIDTH-Q_M*GMWR2MM_L;
+parameter Q_R = DATA_WIDTH-Q_M*KLMM_L;
 logic signed [DATA_WIDTH:0] last_c;
-assign last_c = $signed(c[GMWR2MM_L][2*DATA_WIDTH-GMWR2MM_L*Q_M:Q_R]) - ((Q_R)? ((c[GMWR2MM_L][Q_R-1:0]*Q_K)<<(Q_M-Q_R)) : 0);
+assign last_c = $signed(c[KLMM_L][2*DATA_WIDTH-KLMM_L*Q_M:Q_R]) - ((Q_R)? ((c[KLMM_L][Q_R-1:0]*Q_K)<<(Q_M-Q_R)) : 0);
 always_ff @(posedge clk) begin
 	if (last_c<0) result <= last_c+Q;
 	else result <= last_c;
 end
+endmodule
 
-`else //default : MULTYPE_MWR2MM
+/*****
+MWR2MM
+output: a*b*2^^(-t)
+*****/
+
+/*
+typedef struct{
+	logic [DATA_WIDTH-1:0]ss;
+	logic [DATA_WIDTH-1:Q_M]snc;
+	logic [Q_M-1:0] sc;
+} mwr2mm_s;
+module MWR2MM #(parameter WIDTH=DATA_WIDTH)(
+	input clk,
+	input [DATA_WIDTH-1:0] a, input [WIDTH-1:0] b,
+	output logic [DATA_WIDTH-1:0] result
+);
+*/
+
+/*old MWR2MM
+logic [WIDTH-1:0] tmp_b[WIDTH+1];
+logic [DATA_WIDTH-1:0] tmp_a[WIDTH+1];
+assign tmp_a[0] = a;
+assign tmp_b[0] = b;
+
+logic signed [DATA_WIDTH:0] data[WIDTH+1];
+logic signed [DATA_WIDTH+1:0] tmp_data[WIDTH];
+assign data[0] = '0;
+
+always_comb begin
+	for (int i=0; i < WIDTH; i++) begin
+		tmp_data[i] = data[i];
+		if (tmp_b[i][i]) tmp_data[i] += tmp_a[i];
+		if (tmp_data[i][0]) tmp_data[i][WIDTH+1:Q_M] -= Q_K;
+	end
+end
+always_ff @(posedge clk) begin
+	for (int i=0; i < WIDTH; i++) begin
+		data[i+1] <= tmp_data[i]>>1;
+		tmp_a[i+1] <= tmp_a[i];
+		tmp_b[i+1] <= tmp_b[i];
+	end
+	result <= (data[WIDTH][DATA_WIDTH])? DATA_WIDTH'(data[WIDTH]+Q) : DATA_WIDTH'(data[WIDTH]);
+end
+*/
+/*
 logic [WIDTH-1:0] tmp_b[WIDTH+1];
 logic [DATA_WIDTH-1:0] tmp_a[WIDTH+1];
 assign tmp_a[0] = a;
@@ -153,10 +174,7 @@ always_ff @(posedge clk) begin
 	tmp_result <= data[WIDTH].ss+data[WIDTH].sc-(data[WIDTH].snc<<Q_M);
 	result <= (tmp_result[DATA_WIDTH])? DATA_WIDTH'(tmp_result+Q):DATA_WIDTH'(tmp_result);
 end
-`endif
-
 endmodule
-
 
 module MWR2MM_stage(
 	input [DATA_WIDTH-1:0] a, input mwr2mm_s in,
@@ -179,5 +197,16 @@ always_comb begin
 			end
 		endcase
 	end
+end
+endmodule
+*/
+
+module undefined_mo_mul #(parameter WIDTH=DATA_WIDTH)(
+	input clk,
+	input [DATA_WIDTH-1:0] a, input [WIDTH-1:0] b,
+	output logic [DATA_WIDTH-1:0] result
+);
+initial begin
+	$display("Undefined MUL_TYPE");
 end
 endmodule

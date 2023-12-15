@@ -2,11 +2,11 @@
 # basic parameters
 SHELL := /bin/bash
 
-# available ALGORITHM: ALG_CRYSTALS ALG_DIFDIT
+# available ALGORITHM: ALG_PWC ALG_NWC
 # kyber
 Q = 3329
 NTT_STAGE_CNT = 7
-ALGORITHM = ALG_CRYSTALS
+ALGORITHM = ALG_NWC
 
 # dilithium
 #Q = 8380417
@@ -20,15 +20,14 @@ ALGORITHM = ALG_CRYSTALS
 # qTESLA
 #Q = 343576577
 #NTT_STAGE_CNT = 9
-#ALGORITHM = ALG_DIFDIT
+#ALGORITHM = ALG_PWC
 
 #define to use which mo_mul
-#available: "MULTYPE_KRED", "MULTYPE_MWR2MM"
-#default is "MULTYPE_MWR2MM"
-#MO_MUL_TYPE = MULTYPE_KRED
-#MO_MUL_TYPE = MULTYPE_MWR2MM
-MO_MUL_TYPE = MULTYPE_GMWR2MM
-
+#available: "KRED", "KLMM"
+#default is "KLMM"
+#MO_MUL_TYPE = KRED
+#MO_MUL_TYPE = KLMM
+MO_MUL_TYPE = KLMM
 ##############
 
 # files you dont need to synthesize
@@ -36,7 +35,7 @@ PKG_FILE		=	ntt_pkg.sv
 TB_TOP_FILE		=	tb_ntt.sv
 TB_MUL_TOP_FILE	=	tb_mul.sv
 # files you want synthesize
-TOP_FILE		=	top_ntt.sv add_sub.sv fifo.sv mo_mul.sv ntt.sv zeta_rom.sv intt.sv
+TOP_FILE		=	top_ntt.sv add_sub.sv fifo.sv mo_mul.sv ntt.sv tf_rom.sv intt.sv
 #add_sub.svh fifo.svh mo_mul.svh ntt.svh ntt_param.svh rom.svh
 MUL_TOP_FILE	=	mo_mul.sv
 # top module
@@ -57,7 +56,7 @@ default:
 	@echo "clean      => Clear file after synthesize"
 	@echo "-----------------"
 	@echo "gen_files  => Generate all require file by parameter in Makefile"
-	@echo "gen_rom    => run gen_rom calculate rom values"
+	@echo "gen_tf_rom    => run gen_tf_rom calculate rom values"
 
 all: gtech_ntt syn gate
 
@@ -65,11 +64,11 @@ all: gtech_ntt syn gate
 		#-debug_access+all \
 		#-debug_pp +v2k +memcbk \
 
-gen_rom: gen_rom.c Makefile
-	gcc gen_rom.c -o gen_rom -std=c99
-	./gen_rom $(NTT_STAGE_CNT) $(Q) $(ALGORITHM) $(MO_MUL_TYPE)
+gen_tf_rom: gen_tf_rom.c Makefile
+	gcc gen_tf_rom.c -o gen_tf_rom -std=c99
+	./gen_tf_rom $(NTT_STAGE_CNT) $(Q) $(ALGORITHM) $(MO_MUL_TYPE)
 
-gen_files: gen_rom
+gen_files: gen_tf_rom
 # parameters for ntt
 	echo -e " \
 		//THIS IS GENERATED FILE!\n\
@@ -79,7 +78,7 @@ gen_files: gen_rom
 		> ntt_param.svh;
 	echo -e " \
 		//THIS IS GENERATED FILE!\n\
-		\`define $(MO_MUL_TYPE)" \
+		\`define MO_MUL $(MO_MUL_TYPE)" \
 		> ntt_macro.svh;
 	echo -e " \
 		//THIS IS GENERATED FILE!\n\
@@ -168,5 +167,5 @@ clean:
 # simulation files
 	rm ./*.err ./*.log syn/$(TOP)_syn* *.fsdb irun.history -f
 # generated files
-	rm *.dat ntt_param.svh ntt_macro.svh rom.svh fake_rom.svh gen_rom -f
+	rm *.dat ntt_param.svh ntt_macro.svh rom.svh fake_rom.svh gen_tf_rom -f
 

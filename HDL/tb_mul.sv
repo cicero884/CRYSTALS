@@ -1,5 +1,5 @@
 /************
-testbench for check correct of mo_mul
+testbench for check correct of `MO_MUL
 ************/
 import ntt_pkg::*;
 `define CYCLE 10.0
@@ -12,7 +12,7 @@ always begin
 end
 initial begin
 	//$fsdbDumpfile("mul.fsdb");
-	//$fsdbDumpvars(0, mo_mul, "+mda");
+	//$fsdbDumpvars(0, `MO_MUL, "+mda");
 	//$vcdplusmemon();
 	//$fsdbDumpfile("mul.fsdb");
 	//#5 $mpvars(0,tb_mul,"+mda");
@@ -26,13 +26,15 @@ logic [DATA_WIDTH-1:0] in1=1,in2=1;
 logic [DATA_WIDTH-1:0] out,min=Q,max='0;
 logic [DATA_WIDTH-1:0] in1_delay[MUL_STAGE_CNT+1],in2_delay[MUL_STAGE_CNT+1];
 int gold,real_out;
-`ifdef MULTYPE_KRED
-assign gold = (in1_delay[MUL_STAGE_CNT]*in2_delay[MUL_STAGE_CNT]*(Q_K**KRED_L))%Q;
-assign real_out = out%Q;
-`else
-assign gold = (in1_delay[MUL_STAGE_CNT]*in2_delay[MUL_STAGE_CNT])%Q;
-assign real_out = ((1<<DATA_WIDTH)*out)%Q;
-`endif
+`ifdef MO_MUL
+if(`MO_MUL == KRED) begin
+	assign gold = (in1_delay[MUL_STAGE_CNT]*in2_delay[MUL_STAGE_CNT]*(Q_K**KRED_L))%Q;
+	assign real_out = out%Q;
+end
+else begin
+	assign gold = (in1_delay[MUL_STAGE_CNT]*in2_delay[MUL_STAGE_CNT])%Q;
+	assign real_out = ((1<<DATA_WIDTH)*out)%Q;
+end
 logic finish='0,out_en='0;
 logic countdown;
 assign in1_delay[0] = in1;
@@ -71,6 +73,6 @@ always_ff @(posedge clk) begin
 
 	if (finish && in2 >= MUL_STAGE_CNT+1) $finish;
 end
-mo_mul u_mul(.a(in1),.b(in2),.result(out),.*);
+`MO_MUL u_mul(.a(in1),.b(in2),.result(out),.*);
 
 endmodule

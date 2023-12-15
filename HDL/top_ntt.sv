@@ -14,10 +14,10 @@ module top_ntt(
 	output logic pwm_out_en, output logic [DATA_WIDTH-1:0] pwm_out1, output logic [DATA_WIDTH-1:0] pwm_out2
 );
 
-// all the zeta
+// all the tf
 logic [NTT_STAGE_CNT-2:0] rom_addr[2][NTT_STAGE_CNT];
 logic [DATA_WIDTH-1:0] rom_data[2][NTT_STAGE_CNT];
-zeta_rom zeta_rom(.*);
+tf_rom tf_rom(.*);
 
 // fifo controls
 localparam ntt_cnt = 1;
