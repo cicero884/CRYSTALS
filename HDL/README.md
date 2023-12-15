@@ -1,4 +1,6 @@
 # DHL(system verilog)
+This project is suspend since I'm graduate
+Not sure if I have time continue this...
 TODO:implement keygen & testbench  
 probally the seed is given  
 no random for test  
@@ -118,8 +120,8 @@ duel port rom store tf values.
 ### gen_tf_rom.c
 calculate twiddle factor to required data files for rom to read  
 input : argv1=log2(poly size), argv2=prine, argv3=root_of_unit(optional)  
-ex1: `gen_tf_rom 7 3329`  
-ex2: `gen_tf_rom 7 3329 17`  
+ex1: `gen_tf_rom 7 3329 NWC`  
+ex2: `gen_tf_rom 7 3329 NWC 17`  
 (for kyber is 7,3329,17 since the odd and even is separate)   
 (https://www.ietf.org/archive/id/draft-cfrg-schwabe-kyber-01.html)  
 output : multiple .dat files for rom to read  

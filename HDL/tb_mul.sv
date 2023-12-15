@@ -1,6 +1,7 @@
 /************
 testbench for check correct of `MO_MUL
 ************/
+`include "tool.svh"
 import ntt_pkg::*;
 `define CYCLE 10.0
 
@@ -27,7 +28,7 @@ logic [DATA_WIDTH-1:0] out,min=Q,max='0;
 logic [DATA_WIDTH-1:0] in1_delay[MUL_STAGE_CNT+1],in2_delay[MUL_STAGE_CNT+1];
 int gold,real_out;
 `ifdef MO_MUL
-if(`MO_MUL == KRED) begin
+if(`STRINGIFY(`MO_MUL) == "KRED") begin
 	assign gold = (in1_delay[MUL_STAGE_CNT]*in2_delay[MUL_STAGE_CNT]*(Q_K**KRED_L))%Q;
 	assign real_out = out%Q;
 end
@@ -35,6 +36,11 @@ else begin
 	assign gold = (in1_delay[MUL_STAGE_CNT]*in2_delay[MUL_STAGE_CNT])%Q;
 	assign real_out = ((1<<DATA_WIDTH)*out)%Q;
 end
+`else
+initial begin
+	$display("`MO_MUL is not defined!!");
+end
+`endif
 logic finish='0,out_en='0;
 logic countdown;
 assign in1_delay[0] = in1;
