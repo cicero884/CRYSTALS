@@ -27,7 +27,7 @@ ALGORITHM = ALG_NWC
 #default is "KLMM"
 #MO_MUL_TYPE = KRED
 #MO_MUL_TYPE = KLMM
-MO_MUL_TYPE = KLMM
+MO_MUL_TYPE = XLMM
 ##############
 
 # files you dont need to synthesize

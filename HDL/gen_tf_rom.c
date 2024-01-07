@@ -33,7 +33,7 @@ int main(int argc,char *argv[]){
 	if(argc < 4){
 		printf("input : argv1=log2(poly size), argv2=Q, argv3=algorithm, [argv4=MUL_TYPE], [argv5=root of unity]\n");
 		printf("available algorithm: ALG_NWC, ALG_PWC, ");
-		printf("available MUL_TYPE(effect bias): KRED, KLMM(default)");
+		printf("available MUL_TYPE(effect bias): KRED, KLMM, XLMM(default)");
 		printf("You can chose your root of unity or this program will find smallest for you.");
 		printf("for kyber with K-RED is 7 3329 ALG_NWC KRED 17\n");
 		printf("ex: %s 7 3329 ALG_NWC KLMM 17\n",argv[0]);
@@ -53,7 +53,7 @@ int main(int argc,char *argv[]){
 	// calculate bias for different mul
 	long long unsigned data_max = MSB_2(Q);
 	if(argc>4){
-		if((!strcmp(argv[4],"KLMM"))||(!strcmp(argv[4],"MWR2MM"))){
+		if((!strcmp(argv[4],"KLMM"))||(!strcmp(argv[4],"MWR2MM"))||(!strcmp(argv[4],"XLMM"))){
 			bias = data_max%Q;
 		}
 		else if(!strcmp(argv[4],"KRED")){

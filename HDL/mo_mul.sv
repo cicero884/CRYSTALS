@@ -2,6 +2,7 @@
 modular multiplication
 input: a,b (RANGE:unsigned 0~Q)
 output: result = a*b*? %Q (? depend on algorithm)
+output range depend on algorithm
 ************/
 `include "ntt_macro.svh"
 import ntt_pkg::*;
@@ -9,14 +10,15 @@ import ntt_pkg::*;
 /*****
 KRED
 output: a*b*(k^^l)
+output range: -Q ~ MSB(Q)
 *****/
 module KRED #(parameter WIDTH=DATA_WIDTH)(
 	input clk,
 	input [DATA_WIDTH-1:0] a, input [WIDTH-1:0] b,
-	output logic [DATA_WIDTH-1:0] result
+	output logic signed [DATA_WIDTH:0] result
 );
 initial begin
-	if (WIDTH != DATA_WIDTH) $display("error: Current K_RED only support WIDTH=DATA_WIDTH");
+	assert (WIDTH == DATA_WIDTH) else $display("error: Current K_RED only support WIDTH=DATA_WIDTH");
 end
 logic [DATA_WIDTH-1:0] aR[KRED_MULCUT],bR[KRED_MULCUT];
 logic signed [DATA_WIDTH*2:0] c[KRED_L+1],cR[KRED_MULCUT];
@@ -53,15 +55,16 @@ endmodule
 /*****
 KLMM
 output: a*b*2^^(-t)
+output range: -Q ~ Q
 *****/
 
 module KLMM #(parameter WIDTH=DATA_WIDTH)(
 	input clk,
 	input [DATA_WIDTH-1:0] a, input [WIDTH-1:0] b,
-	output logic [DATA_WIDTH-1:0] result
+	output logic signed[DATA_WIDTH:0] result
 );
 initial begin
-	if (WIDTH != DATA_WIDTH) $display("error: Current KLMM only support WIDTH=DATA_WIDTH");
+	assert (WIDTH == DATA_WIDTH) else $error("Current KLMM only support WIDTH=DATA_WIDTH");
 end
 logic [DATA_WIDTH-1:0] aR[KLMM_MULCUT],bR[KLMM_MULCUT];
 logic signed [DATA_WIDTH*2:0] c[KLMM_L+1],cR[KLMM_MULCUT];
@@ -98,8 +101,67 @@ end
 endmodule
 
 /*****
+XLMM
+output: a*b*2^^(-t)
+output range: -Q ~ Q
+*****/
+
+module XLMM #(parameter WIDTH=DATA_WIDTH)(
+	input clk,
+	input [DATA_WIDTH-1:0] a, input [WIDTH-1:0] b,
+	output logic signed [DATA_WIDTH:0] result
+);
+initial begin
+	assert (WIDTH == DATA_WIDTH) else $error("Current XLMM only support WIDTH=DATA_WIDTH");
+	assert (XLMM_MULSIZE<=Q_M) else $error("XLMM_MULSIZE should smaller than Q_M");
+end
+logic [DATA_WIDTH-1:0] a_cache[XLMM_L+1], b_cache[XLMM_L+1];
+logic signed[DATA_WIDTH:0] xlmm_reduced[XLMM_L+1];
+logic [DATA_WIDTH-1:0] xlmm_prev[XLMM_L];
+logic [DATA_WIDTH+XLMM_MULSIZE-1:0] xlmm_mul[XLMM_L];
+assign xlmm_reduced[0]='0;
+assign a_cache[0]=a;
+assign b_cache[0]=b;
+always_comb begin
+	for(int i=0;i<XLMM_L;i++) begin
+		xlmm_prev[i] = (xlmm_reduced[i]<0)? xlmm_reduced[i]+Q:xlmm_reduced[i]; 
+		xlmm_mul[i] = xlmm_prev[i]+a_cache[i]*b_cache[i][i*XLMM_MULSIZE +:XLMM_MULSIZE];
+	end
+end
+always_ff @(posedge clk) begin
+	for(int i=0;i<XLMM_L;i++) begin
+		xlmm_reduced[i+1] <= xlmm_mul[i][DATA_WIDTH+XLMM_MULSIZE-1:XLMM_MULSIZE]-((xlmm_mul[i][XLMM_MULSIZE-1:0]*Q_K)<<(Q_M-XLMM_MULSIZE));
+		a_cache[i+1] <= a_cache[i];
+		b_cache[i+1] <= b_cache[i];
+	end
+end
+parameter Q_R = DATA_WIDTH-XLMM_MULSIZE*XLMM_L;
+generate
+if(Q_R>0) begin
+	initial begin
+		$display("this XLMM_MULSIZE cannot divide DATA_WIDTH");
+		$display("Q_R = %d",Q_R);
+	end
+	logic [DATA_WIDTH-1:0] xlmm_r_prev;
+	logic [DATA_WIDTH+XLMM_MULSIZE-1:0] xlmm_r_mul;
+	always_comb begin
+		xlmm_r_prev = (xlmm_reduced[XLMM_L]<0)? xlmm_reduced[XLMM_L]+Q:xlmm_reduced[XLMM_L]; 
+		xlmm_r_mul = xlmm_r_prev+a_cache[XLMM_L]*b_cache[XLMM_L][XLMM_L*XLMM_MULSIZE +:Q_R];
+	end
+	always_ff @(posedge clk) begin
+		result <= xlmm_r_mul[DATA_WIDTH+Q_R-1:Q_R]-((xlmm_r_mul[Q_R-1:0]*Q_K)<<(Q_M-Q_R));
+	end
+end
+else begin
+	assign result = xlmm_reduced[XLMM_L]; 
+end
+endgenerate
+
+endmodule
+/*****
 MWR2MM
 output: a*b*2^^(-t)
+output range: -Q ~ Q
 *****/
 
 /*
