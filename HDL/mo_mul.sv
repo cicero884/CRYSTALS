@@ -118,19 +118,28 @@ end
 logic [DATA_WIDTH-1:0] a_cache[XLMM_L+1], b_cache[XLMM_L+1];
 logic signed[DATA_WIDTH:0] xlmm_reduced[XLMM_L+1];
 logic [DATA_WIDTH-1:0] xlmm_prev[XLMM_L];
-logic [DATA_WIDTH+XLMM_MULSIZE-1:0] xlmm_mul[XLMM_L];
+// KRED: 4.2,107+100
+// XLMM 4 stage
+//5.42 210
+//5.40 210
+//XLMM 6 stage
+// 5.53 200
+//logic [DATA_WIDTH+XLMM_MULSIZE-1:0] xlmm_mul[XLMM_L];
+logic signed[DATA_WIDTH+XLMM_MULSIZE:0] xlmm_mul[XLMM_L];
 assign xlmm_reduced[0]='0;
 assign a_cache[0]=a;
 assign b_cache[0]=b;
 always_comb begin
 	for(int i=0;i<XLMM_L;i++) begin
-		xlmm_prev[i] = (xlmm_reduced[i]<0)? xlmm_reduced[i]+Q:xlmm_reduced[i]; 
-		xlmm_mul[i] = xlmm_prev[i]+a_cache[i]*b_cache[i][i*XLMM_MULSIZE +:XLMM_MULSIZE];
+		//xlmm_prev[i] = (xlmm_reduced[i]<0)? xlmm_reduced[i]+Q:xlmm_reduced[i]; 
+		//xlmm_mul[i] = xlmm_prev[i]+a_cache[i]*b_cache[i][i*XLMM_MULSIZE +:XLMM_MULSIZE];
+		xlmm_mul[i] = (DATA_WIDTH+XLMM_MULSIZE+1)'(xlmm_reduced[i])+a_cache[i]*b_cache[i][i*XLMM_MULSIZE +:XLMM_MULSIZE];
 	end
 end
 always_ff @(posedge clk) begin
 	for(int i=0;i<XLMM_L;i++) begin
-		xlmm_reduced[i+1] <= xlmm_mul[i][DATA_WIDTH+XLMM_MULSIZE-1:XLMM_MULSIZE]-((xlmm_mul[i][XLMM_MULSIZE-1:0]*Q_K)<<(Q_M-XLMM_MULSIZE));
+		//xlmm_reduced[i+1] <= xlmm_mul[i][DATA_WIDTH+XLMM_MULSIZE-1:XLMM_MULSIZE]-((xlmm_mul[i][XLMM_MULSIZE-1:0]*Q_K)<<(Q_M-XLMM_MULSIZE));
+		xlmm_reduced[i+1] <= xlmm_mul[i][DATA_WIDTH+XLMM_MULSIZE:XLMM_MULSIZE]-((xlmm_mul[i][XLMM_MULSIZE-1:0]*Q_K)<<(Q_M-XLMM_MULSIZE));
 		a_cache[i+1] <= a_cache[i];
 		b_cache[i+1] <= b_cache[i];
 	end

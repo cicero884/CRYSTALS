@@ -20,7 +20,7 @@ parameter KLMM_L=DATA_WIDTH/Q_M;
 
 // --- XLMM
 // total stage count(depend on your design, it should smaller than Q_M)
-parameter XLMM_MULSIZE=4;
+parameter XLMM_MULSIZE=3;
 // floor for integer DATA_WIDTH/MULSIZE
 parameter XLMM_L=DATA_WIDTH/XLMM_MULSIZE;
 

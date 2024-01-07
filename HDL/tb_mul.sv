@@ -38,6 +38,10 @@ else begin
 	assign mod_out = ($signed(1<<DATA_WIDTH)*out)%Q;
 	assign real_out = (mod_out<0)? mod_out+Q:mod_out;
 end
+initial begin
+	$display("MUL_TYPE : %s",`STRINGIFY(`MO_MUL));
+	$display("MUL_STAGE_CNT = %d",MUL_STAGE_CNT);
+end
 `else
 initial begin
 	$display("`MO_MUL is not defined!!");
@@ -69,7 +73,10 @@ always_ff @(posedge clk) begin
 	if (en_cnt>MUL_STAGE_CNT) out_en<=1;
 	else en_cnt <= en_cnt+1;
 	if (out_en) begin
-		assert (gold == real_out) else $display("%d * %d = %d != %d (%d)\n",in1_delay[MUL_STAGE_CNT],in2_delay[MUL_STAGE_CNT],gold,real_out,out);
+		assert (gold == real_out) else begin
+			$display("%d * %d = %d != %d (%d)\n",in1_delay[MUL_STAGE_CNT],in2_delay[MUL_STAGE_CNT],gold,real_out,out);
+			$finish;
+		end
 	end
 
 	if (finish && in2 >= MUL_STAGE_CNT+1) $finish;
