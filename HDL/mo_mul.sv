@@ -118,10 +118,15 @@ end
 logic [DATA_WIDTH-1:0] a_cache[XLMM_L+1], b_cache[XLMM_L+1];
 logic signed[DATA_WIDTH:0] xlmm_reduced[XLMM_L+1];
 logic [DATA_WIDTH-1:0] xlmm_prev[XLMM_L];
-// KRED: 4.2,107+100
+// KRED: (4)
+// no retiming:4.2,107+100
+// retiming: 5.38,94+100
+// KLMM:(4)
+// no retiming: 5.002 78+100
+// retiming: 5.305 78+100
 // XLMM 4 stage
-//5.42 210
 //5.40 210
+// retiming : 4.992 217
 //XLMM 6 stage
 // 5.53 200
 //logic [DATA_WIDTH+XLMM_MULSIZE-1:0] xlmm_mul[XLMM_L];

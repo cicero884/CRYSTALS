@@ -17,7 +17,11 @@ do
 	sed -i "s/$variable=[0-9]/$variable=$var/" $file
 	for clk in $(seq 1.0 0.1 5.0)
 	do
-		echo "create_clock -period $clk -name clk [get_ports clk]" > clk.sdc
+		half_cycle=$(bc <<< "scale=4; $clk/3")
+		echo "create_clock -period $clk -name clk -waveform {$clk $half_cycle} [get_ports clk]" > clk.sdc
+		# TODO add half inout delay?(not here)
+		#echo "set_input_delay $half_cycle -clock clk [remove_from_collection [all_inputs] [get_ports clk]] -clock_fall"
+		#echo "set_output_delay -clock clk -clock_fall 0.500 [all_outputs]"
 		make syn
 		area_log=$(< area.log)
 		if grep -wq "VIOLATED" timing.log; then
