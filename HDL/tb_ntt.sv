@@ -20,9 +20,6 @@ You may need to edit this to read different data input!
 `define CYCLE     8.0
 `define MAX_CYCLE 14000000
 
-`ifdef SDF 
-	initial $sdf_annotate("syn/top_ntt_syn.sdf",u_top_ntt);
-`endif
 
 
 `ifdef SEPARATE_ODD_EVEN
@@ -34,6 +31,9 @@ You may need to edit this to read different data input!
 `include "tool.svh"
 import ntt_pkg::*;
 module tb_ntt();
+`ifdef SDF 
+	initial $sdf_annotate("syn/top_ntt_syn.sdf",u_top_ntt);
+`endif
 
 logic clk = '0,rst;
 always begin 
