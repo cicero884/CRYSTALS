@@ -15,7 +15,7 @@ output range: -Q ~ MSB(Q)
 module KRED #(parameter WIDTH=DATA_WIDTH)(
 	input clk,
 	input [DATA_WIDTH-1:0] a, input [WIDTH-1:0] b,
-	output logic signed [DATA_WIDTH:0] result
+	output logic [DATA_WIDTH-1:0] result
 );
 initial begin
 	assert (WIDTH == DATA_WIDTH) else $display("error: Current K_RED only support WIDTH=DATA_WIDTH");
@@ -61,7 +61,7 @@ output range: -Q ~ Q
 module KLMM #(parameter WIDTH=DATA_WIDTH)(
 	input clk,
 	input [DATA_WIDTH-1:0] a, input [WIDTH-1:0] b,
-	output logic signed[DATA_WIDTH:0] result
+	output logic [DATA_WIDTH-1:0] result
 );
 initial begin
 	assert (WIDTH == DATA_WIDTH) else $error("Current KLMM only support WIDTH=DATA_WIDTH");
@@ -109,14 +109,14 @@ output range: -Q ~ Q
 module XLMM #(parameter WIDTH=DATA_WIDTH)(
 	input clk,
 	input [DATA_WIDTH-1:0] a, input [WIDTH-1:0] b,
-	output logic signed [DATA_WIDTH:0] result
+	output logic [DATA_WIDTH-1:0] result
 );
 initial begin
 	assert (WIDTH == DATA_WIDTH) else $error("Current XLMM only support WIDTH=DATA_WIDTH");
 	assert (XLMM_MULSIZE<=Q_M) else $error("XLMM_MULSIZE should smaller than Q_M");
 end
 logic [DATA_WIDTH-1:0] a_cache[XLMM_L+1], b_cache[XLMM_L+1];
-logic signed[DATA_WIDTH:0] xlmm_reduced[XLMM_L+1];
+logic signed[DATA_WIDTH:0] xlmm_reduced[XLMM_L+1], xlmm_r_reduced;
 logic [DATA_WIDTH-1:0] xlmm_prev[XLMM_L];
 // KRED: (4)
 // no retiming:4.2,107+100
@@ -163,11 +163,12 @@ if(Q_R>0) begin
 		xlmm_r_mul = xlmm_r_prev+a_cache[XLMM_L]*b_cache[XLMM_L][XLMM_L*XLMM_MULSIZE +:Q_R];
 	end
 	always_ff @(posedge clk) begin
-		result <= xlmm_r_mul[DATA_WIDTH+Q_R-1:Q_R]-((xlmm_r_mul[Q_R-1:0]*Q_K)<<(Q_M-Q_R));
+		xlmm_r_reduced <= xlmm_r_mul[DATA_WIDTH+Q_R-1:Q_R]-((xlmm_r_mul[Q_R-1:0]*Q_K)<<(Q_M-Q_R));
 	end
+	assign result = (xlmm_r_reduced<0)? xlmm_r_reduced+Q:xlmm_r_reduced;
 end
 else begin
-	assign result = xlmm_reduced[XLMM_L]; 
+	assign result = (xlmm_reduced[XLMM_L]<0)? xlmm_reduced[XLMM_L]+Q:xlmm_reduced[XLMM_L]; 
 end
 endgenerate
 

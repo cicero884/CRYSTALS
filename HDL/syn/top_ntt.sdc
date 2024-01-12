@@ -10,8 +10,8 @@ set_ideal_network           [get_ports clk]
 
 
 #Don't touch the basic env setting as below
-set_input_delay [expr 0.5 * clk] -clock clk [remove_from_collection [all_inputs] [get_ports clk]] -clock_fall
-set_output_delay -clock clk -clock_fall [expr 0.5 * clk] [all_outputs]
+set_input_delay [expr 0.5 * $clk] -clock clk [remove_from_collection [all_inputs] [get_ports clk]] -clock_fall
+set_output_delay -clock clk -clock_fall [expr 0.5 * $clk] [all_outputs]
 #set_input_delay  0   -clock clk [remove_from_collection [all_inputs] [get_ports clk]] -clock_fall
 #set_output_delay -clock clk -clock_fall 0.000 [all_outputs]
 
